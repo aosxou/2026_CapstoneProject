@@ -428,10 +428,56 @@ function Dashboard({ onNavTo }) {
             )}
           </div>
         </div>
-        {[{ name: "국가장학금 신청 안내문", date: "2026.03.14 · 마감 D-3", status: "진행 중", color: C.purple, bg: C.purpleBg },
-          { name: "근로장학금 신청서", date: "2026.02.28 · 마감 완료", status: "완료", color: C.green, bg: C.greenBg }
+        {[
+          {
+            name: "국가장학금 신청 안내문",
+            date: "2026.03.14 · 마감 D-3",
+            status: "진행 중",
+            color: C.purple,
+            bg: C.purpleBg,
+            title: "국가장학금 신청",
+            deadline: "2026-03-17 17:00",
+            ago: "D-3",
+            done: 2,
+            total: 4,
+            summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.",
+            upload: "2026.03.14 14:23",
+            documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"]
+          },
+          {
+            name: "근로장학금 신청서",
+            date: "2026.02.28 · 마감 완료",
+            status: "완료",
+            color: C.green,
+            bg: C.greenBg,
+            title: "근로장학금 신청",
+            deadline: "2026-03-27 23:59",
+            ago: "마감 완료",
+            done: 3,
+            total: 3,
+            summary: "학교 근로 장학금 신청입니다. 근로시간 증명서와 통장 사본이 필요합니다.",
+            upload: "2026.02.28 10:15",
+            documents: ["재학증명서", "통장 사본", "신원증 사본"]
+          }
         ].map(doc => (
-          <div key={doc.name} style={{ background: "white", border: "1px solid #E8E4F4", borderRadius: 10, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+          <div
+            key={doc.name}
+            onClick={() => onNavTo("doc-detail", null, doc)}
+            style={{
+              background: "white",
+              border: "1px solid #E8E4F4",
+              borderRadius: 10,
+              padding: "14px 16px",
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 8,
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 4px 16px rgba(107,79,232,0.1)"}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = "none"}
+          >
             <span style={{ fontSize: 22 }}>📄</span>
             <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 600 }}>{doc.name}</div><div style={{ fontSize: 11, color: C.textLight, marginTop: 2 }}>{doc.date}</div></div>
             <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: doc.bg, color: doc.color }}>{doc.status}</span>
@@ -1083,7 +1129,7 @@ function DocumentDetailPage({ data, onNavTo }) {
           <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{data.title}</div>
           <div style={{ fontSize: 14, color: C.textLight }}>마감: {data.deadline} · {data.ago}</div>
         </div>
-        <button onClick={() => onNavTo("sub-ongoing")} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
+        <button onClick={() => onNavTo("sub-home")} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
       </div>
 
       {/* 진행률 배지 */}

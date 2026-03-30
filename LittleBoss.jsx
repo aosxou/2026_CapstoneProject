@@ -1100,6 +1100,13 @@ function DocumentDetailPage({ data, onNavTo }) {
         } catch (e) {
           console.error("데이터 로드 오류:", e);
         }
+      } else {
+        // 처음 로드: data.done개만큼 기본으로 선택
+        const initialChecks = {};
+        for (let i = 0; i < data.done; i++) {
+          initialChecks[i] = true;
+        }
+        setChecks(initialChecks);
       }
     }
   }, [data]);
@@ -1119,7 +1126,7 @@ function DocumentDetailPage({ data, onNavTo }) {
   };
 
   const completedCount = Object.values(checks).filter(Boolean).length;
-  const statusColor = data.done === data.total ? C.green : data.done > 0 ? "#EA580C" : C.red;
+  const statusColor = completedCount === data.total ? C.green : completedCount > 0 ? "#EA580C" : C.red;
 
   return (
     <div>
@@ -1133,7 +1140,7 @@ function DocumentDetailPage({ data, onNavTo }) {
       </div>
 
       {/* 진행률 배지 */}
-      <div style={{ display: "inline-block", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 20, background: statusColor === C.green ? "#F0FDF4" : statusColor === C.red ? "#FFE5E5" : "#FFF7ED", color: statusColor, marginBottom: 20 }}>{data.done}/{data.total} 완료</div>
+      <div style={{ display: "inline-block", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 20, background: statusColor === C.green ? "#F0FDF4" : statusColor === C.red ? "#FFE5E5" : "#FFF7ED", color: statusColor, marginBottom: 20 }}>{completedCount}/{data.total} 완료</div>
 
       {/* 내용 그리드 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>

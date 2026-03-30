@@ -1329,7 +1329,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Noto Sans KR', sans-serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} />
-      <div style={{ display: "flex", paddingTop: 58, minHeight: "100vh" }}>
+      <div style={{ display: "flex", paddingTop: 58, minHeight: "calc(100vh - 58px)" }}>
         <Sidebar currentSub={sub} onNavTo={navTo} />
         <main style={{ marginLeft: 200, flex: 1, padding: "28px 28px 40px 48px" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.textLight, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{titleMap[sub]}</div>

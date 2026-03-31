@@ -581,7 +581,6 @@ function UploadPage({ onNavTo }) {
                   <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
                   <div style={{ fontSize: 11, color: C.textLight, marginTop: 2 }}>{f.date}</div>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: f.done ? C.greenBg : C.purpleBg, color: f.done ? C.green : C.purple }}>{f.done ? "완료" : "진행"}</span>
               </div>
             ))}
           </div>

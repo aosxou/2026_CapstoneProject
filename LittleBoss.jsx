@@ -774,7 +774,7 @@ function ExpiredPage({ onNavTo }) {
   );
 }
 
-function ScheduleDetailPage({ day, onNavTo }) {
+function ScheduleDetailPage({ day, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
 
@@ -828,7 +828,7 @@ function ScheduleDetailPage({ day, onNavTo }) {
           <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{data.title}</div>
           <div style={{ fontSize: 14, color: C.textLight }}>마감: {data.deadline}</div>
         </div>
-        <button onClick={() => onNavTo("sub-schedule")} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
+        <button onClick={() => onNavTo(prevSub || "sub-schedule")} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
       </div>
 
       {/* 디데이 배지 */}
@@ -1091,7 +1091,7 @@ function DocumentAnalysisPage({ fileId, onNavTo }) {
   );
 }
 
-function DocumentDetailPage({ data, onNavTo }) {
+function DocumentDetailPage({ data, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
 
@@ -1144,7 +1144,7 @@ function DocumentDetailPage({ data, onNavTo }) {
           <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>{data.title}</div>
           <div style={{ fontSize: 14, color: C.textLight }}>마감: {data.deadline} · {data.ago}</div>
         </div>
-        <button onClick={() => onNavTo("sub-home")} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
+        <button onClick={() => onNavTo(prevSub || "sub-home")} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
       </div>
 
       {/* 진행률 배지 */}
@@ -1311,6 +1311,7 @@ export default function App() {
   const params = new URLSearchParams(window.location.search);
   const [page, setPage] = useState(params.get("page") || "login"); // "signup" | "login" | "app"
   const [sub, setSub] = useState(params.get("sub") || "sub-home");
+  const [prevSub, setPrevSub] = useState("sub-home");
   const [scheduleDetailDay, setScheduleDetailDay] = useState(null);
   const [docDetailData, setDocDetailData] = useState(null);
   const [docAnalysisId, setDocAnalysisId] = useState(null);
@@ -1320,7 +1321,7 @@ export default function App() {
 
   const handleLogin = (m) => { setPage("app"); setSub("sub-home"); toast(m); };
   const handleLogout = () => { setPage("login"); toast("로그아웃됐어요"); };
-  const navTo = (s, detailDay, data) => { setSub(s); if(detailDay) setScheduleDetailDay(detailDay); if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
+  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) setScheduleDetailDay(detailDay); if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
 
   if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
   if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} /><ToastEl msg={msg} show={show} /></>;
@@ -1336,10 +1337,10 @@ export default function App() {
           {sub === "sub-home" && <Dashboard onNavTo={navTo} />}
           {sub === "sub-upload" && <UploadPage onNavTo={navTo} />}
           {sub === "sub-schedule" && <SchedulePage onNavTo={navTo} />}
-          {sub === "schedule-detail" && <ScheduleDetailPage day={scheduleDetailDay} onNavTo={navTo} />}
+          {sub === "schedule-detail" && <ScheduleDetailPage day={scheduleDetailDay} prevSub={prevSub} onNavTo={navTo} />}
           {sub === "sub-ongoing" && <OngoingPage onNavTo={navTo} />}
           {sub === "sub-expired" && <ExpiredPage onNavTo={navTo} />}
-          {sub === "doc-detail" && <DocumentDetailPage data={docDetailData} onNavTo={navTo} />}
+          {sub === "doc-detail" && <DocumentDetailPage data={docDetailData} prevSub={prevSub} onNavTo={navTo} />}
           {sub === "notif-announcement" && <NotificationAnnouncementPage onNavTo={navTo} />}
           {sub === "notif-analysis" && <NotificationAnalysisPage onNavTo={navTo} />}
           {sub === "doc-analysis" && <DocumentAnalysisPage fileId={docAnalysisId} onNavTo={navTo} />}

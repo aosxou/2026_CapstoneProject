@@ -137,7 +137,7 @@ function LoginPage({ onLogin, goSignup }) {
 }
 
 // ── App Shell ──
-function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
+function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen, setSidebarOpen }) {
   const [dd, setDd] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notificationsRaw = [
@@ -155,9 +155,12 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
   }, []);
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 50, background: C.white, borderBottom: `1px solid ${C.purpleBorder}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16, minWidth: "1200px" }}>
-      <div onClick={() => onNavTo("sub-home")} style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 700, fontSize: 17, color: C.text, width: 200, flexShrink: 0, cursor: "pointer" }}>
-        <img src={logo} alt="LittleBoss" style={{ width: 44, height: 44, borderRadius: 8 }} />
-        LittleBoss
+      <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+        <div onClick={() => onNavTo("sub-home")} style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 700, fontSize: 17, color: C.text, cursor: "pointer" }}>
+          <img src={logo} alt="LittleBoss" style={{ width: 44, height: 44, borderRadius: 8 }} />
+          LittleBoss
+        </div>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ width: 36, height: 36, borderRadius: 8, border: "none", background: C.purpleBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: C.purple }}>☰</button>
       </div>
       <span style={{ fontWeight: 700, fontSize: 15, color: C.text }} id="header-title"></span>
       <div style={{ flex: 1 }} />
@@ -246,7 +249,7 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
   );
 }
 
-function Sidebar({ currentSub, onNavTo }) {
+function Sidebar({ currentSub, onNavTo, sidebarOpen }) {
   const [subOpen, setSubOpen] = useState(false);
   const navItem = (id, icon, label, active) => (
     <div onClick={() => onNavTo(id)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, fontSize: 13, fontWeight: active ? 600 : 500, color: active ? "white" : C.textMid, background: active ? C.purple : "transparent", cursor: "pointer", marginBottom: 2 }}>
@@ -255,7 +258,7 @@ function Sidebar({ currentSub, onNavTo }) {
   );
   const isDocsSub = ["sub-schedule","sub-ongoing","sub-expired"].includes(currentSub);
   return (
-    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto" }}>
+    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto", display: sidebarOpen ? "block" : "none", transition: "display 0.25s" }}>
       {navItem("sub-home", "🏠", "대시보드", currentSub === "sub-home")}
       {navItem("sub-upload", "📎", "문서 업로드", currentSub === "sub-upload")}
       <div onClick={() => setSubOpen(p => !p)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, fontSize: 13, fontWeight: 500, color: isDocsSub ? C.purple : C.textMid, cursor: "pointer", marginBottom: 2 }}>
@@ -1466,6 +1469,7 @@ export default function App() {
   const [scheduleDetailDay, setScheduleDetailDay] = useState(null);
   const [docDetailData, setDocDetailData] = useState(null);
   const [docAnalysisId, setDocAnalysisId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { msg, show, toast } = useToast();
 
   const titleMap = { "sub-home":"대시보드","sub-upload":"문서 업로드","sub-schedule":"일정 관리","sub-ongoing":"진행 중인 문서","sub-expired":"마감된 문서","sub-profile":"내 정보", "schedule-detail":"일정 상세", "doc-detail":"문서 상세", "notif-announcement":"공지사항", "notif-analysis":"문서 분석 결과", "doc-analysis":"문서 분석 결과" };
@@ -1496,10 +1500,10 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Noto Sans KR', sans-serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-      <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} />
+      <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div style={{ display: "flex", paddingTop: 58, minHeight: "calc(100vh - 58px)", minWidth: "1200px" }}>
-        <Sidebar currentSub={sub} onNavTo={navTo} />
-        <main style={{ marginLeft: 200, flex: 1, padding: "28px 28px 40px 48px" }}>
+        <Sidebar currentSub={sub} onNavTo={navTo} sidebarOpen={sidebarOpen} />
+        <main style={{ marginLeft: sidebarOpen ? 200 : 0, flex: 1, padding: "28px 28px 40px 48px", transition: "marginLeft 0.25s" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.textLight, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{titleMap[sub]}</div>
           {sub === "sub-home" && <Dashboard onNavTo={navTo} />}
           {sub === "sub-upload" && <UploadPage onNavTo={navTo} />}

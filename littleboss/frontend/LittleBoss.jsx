@@ -887,9 +887,9 @@ function ExpiredPage({ onNavTo }) {
           <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 320, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>삭제하시겠습니까?</div>
             <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24 }}>{deleteTarget}을(를) 삭제합니다</div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={handleDeleteCancel} style={{ ...S.btnOutline, flex: 1, fontSize: 13 }}>아니오</button>
-              <button onClick={handleDeleteConfirm} style={{ ...S.btnPrimary, flex: 1, fontSize: 13 }}>예</button>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={handleDeleteCancel} style={{ ...S.btnOutline, fontSize: 13 }}>아니오</button>
+              <button onClick={handleDeleteConfirm} style={{ ...S.btnPrimary, fontSize: 13 }}>예</button>
             </div>
           </div>
         </div>

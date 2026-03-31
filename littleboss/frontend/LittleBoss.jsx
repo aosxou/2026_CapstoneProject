@@ -258,7 +258,7 @@ function Sidebar({ currentSub, onNavTo, sidebarOpen }) {
   );
   const isDocsSub = ["sub-schedule","sub-ongoing","sub-expired"].includes(currentSub);
   return (
-    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto", transform: sidebarOpen ? "translateX(0)" : "translateX(-200px)", transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1)", opacity: sidebarOpen ? 1 : 0, visibility: sidebarOpen ? "visible" : "hidden", pointerEvents: sidebarOpen ? "auto" : "none" }}>
+    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto", transform: sidebarOpen ? "translateX(0)" : "translateX(-200px)", opacity: sidebarOpen ? 1 : 0, transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)", pointerEvents: sidebarOpen ? "auto" : "none" }}>
       {navItem("sub-home", "🏠", "대시보드", currentSub === "sub-home")}
       {navItem("sub-upload", "📎", "문서 업로드", currentSub === "sub-upload")}
       <div onClick={() => setSubOpen(p => !p)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, fontSize: 13, fontWeight: 500, color: isDocsSub ? C.purple : C.textMid, cursor: "pointer", marginBottom: 2 }}>

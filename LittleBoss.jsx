@@ -231,9 +231,9 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
             {dd && (
               <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "white", borderRadius: 12, padding: 6, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", minWidth: 130, zIndex: 200 }}>
                 {[{ label: "내 정보", action: () => { onNavTo("sub-profile"); setDd(false); } },
-                  { label: "로그아웃", action: onLogout, danger: true }
+                  { label: "로그아웃", action: () => { onLogout(); setDd(false); }, danger: true }
                 ].map(item => (
-                  <div key={item.label} onClick={item.action} style={{ padding: "9px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", color: item.danger ? C.red : C.text }}>
+                  <div key={item.label} onClick={(e) => { e.stopPropagation(); item.action(); }} style={{ padding: "9px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", color: item.danger ? C.red : C.text }}>
                     {item.label}
                   </div>
                 ))}

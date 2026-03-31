@@ -600,8 +600,8 @@ function UploadPage({ onNavTo }) {
               <br/>파일을 업로드 하시겠습니까?
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={handleCancelUpload} style={{ ...S.btnOutline, flex: 1, fontSize: 13 }}>취소</button>
-              <button onClick={handleConfirmUpload} style={{ ...S.btnPrimary, flex: 1, fontSize: 13 }}>확인</button>
+              <button onClick={handleCancelUpload} style={{ ...S.btnOutline, flex: 1, fontSize: 13, justifyContent: "center" }}>취소</button>
+              <button onClick={handleConfirmUpload} style={{ ...S.btnPrimary, flex: 1, fontSize: 13, justifyContent: "center" }}>확인</button>
             </div>
           </div>
         </div>

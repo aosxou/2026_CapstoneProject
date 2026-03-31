@@ -1323,6 +1323,22 @@ export default function App() {
   const handleLogout = () => { setPage("login"); toast("로그아웃됐어요"); };
   const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) setScheduleDetailDay(detailDay); if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
 
+  // 히스토리 관리
+  useEffect(() => {
+    window.history.pushState({ sub, scheduleDetailDay, docDetailData }, null, '');
+
+    const handlePopState = (e) => {
+      if (e.state) {
+        setSub(e.state.sub || "sub-home");
+        if (e.state.scheduleDetailDay) setScheduleDetailDay(e.state.scheduleDetailDay);
+        if (e.state.docDetailData) setDocDetailData(e.state.docDetailData);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [sub, scheduleDetailDay, docDetailData]);
+
   if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
   if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} /><ToastEl msg={msg} show={show} /></>;
 

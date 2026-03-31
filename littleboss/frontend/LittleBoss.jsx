@@ -569,6 +569,12 @@ function UploadPage({ onNavTo }) {
                 <input type="checkbox" checked={checkedFiles[f.id] || false} onChange={(e) => { setCheckedFiles(prev => ({ ...prev, [f.id]: e.target.checked })); }} style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.purple }} />
               </div>
             ))}
+            {queue.length > 0 && (
+              <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                <button onClick={() => setQueue([])} style={{ ...S.btnOutline, flex: 1, fontSize: 13 }}>업로드 취소</button>
+                <button onClick={() => {}} style={{ ...S.btnPrimary, flex: 1, fontSize: 13, justifyContent: "center" }}>분석하기</button>
+              </div>
+            )}
           </div>
         </div>
         {/* Recent panel */}

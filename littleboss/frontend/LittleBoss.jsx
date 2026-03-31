@@ -492,6 +492,8 @@ function Dashboard({ onNavTo }) {
 function UploadPage({ onNavTo }) {
   const [queue, setQueue] = useState([]);
   const [dragging, setDragging] = useState(false);
+  const [uploadConfirm, setUploadConfirm] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState(null);
   const recentFiles = [
     { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false },
     { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true },
@@ -511,19 +513,37 @@ function UploadPage({ onNavTo }) {
       }, 150);
     });
   };
+
+  const handleFileSelect = (files) => {
+    if (files && files.length > 0) {
+      setFileToUpload(files);
+      setUploadConfirm(true);
+    }
+  };
+
+  const handleConfirmUpload = () => {
+    addFiles(fileToUpload);
+    setUploadConfirm(false);
+    setFileToUpload(null);
+  };
+
+  const handleCancelUpload = () => {
+    setUploadConfirm(false);
+    setFileToUpload(null);
+  };
   return (
     <div>
       <div style={{ marginBottom: 24 }}><div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>문서 업로드</div><div style={{ fontSize: 14, color: C.textLight }}>분석할 문서를 업로드하면 AI가 서류·마감일을 자동 추출합니다.</div></div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20, alignItems: "start" }}>
         <div>
           <div onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
-            onDrop={e => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files); }}
+            onDrop={e => { e.preventDefault(); setDragging(false); handleFileSelect(e.dataTransfer.files); }}
             style={{ border: `2px dashed ${dragging ? C.purple : C.purpleBorder}`, borderRadius: 16, padding: "60px 40px", textAlign: "center", background: dragging ? C.purpleBg : "white", cursor: "pointer", transition: "all .2s" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📂</div>
             <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>여기에 파일을 드래그 & 드롭하세요</div>
             <div style={{ fontSize: 13, color: C.textLight, lineHeight: 1.6 }}>또는 아래 버튼으로 파일을 선택하세요<br/>PDF, JPG, PNG, DOCX 지원 · 최대 20MB</div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 24 }}>
-              <label style={{ ...S.btnPrimary, padding: "10px 20px" }}>📁 파일 선택<input type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => addFiles(e.target.files)} /></label>
+              <label style={{ ...S.btnPrimary, padding: "10px 20px" }}>📁 파일 선택<input type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleFileSelect(e.target.files)} /></label>
               <button style={S.btnOutline} onClick={() => setQueue([])}>✕ 업로드 취소</button>
             </div>
             <div style={{ fontSize: 11, color: C.textLight, marginTop: 12 }}>지원 형식: PDF · DOCX · JPG · PNG · HWP</div>
@@ -559,6 +579,24 @@ function UploadPage({ onNavTo }) {
           </div>
         </div>
       </div>
+
+      {/* 업로드 확인 팝업 */}
+      {uploadConfirm && fileToUpload && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 380, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>파일 업로드</div>
+            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24, lineHeight: 1.6 }}>
+              {[...fileToUpload].slice(0, 2).map(f => f.name).join(", ")}
+              {fileToUpload.length > 2 ? ` 외 ${fileToUpload.length - 2}개` : ""}
+              <br/>파일을 업로드 하시겠습니까?
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handleCancelUpload} style={{ ...S.btnOutline, flex: 1, fontSize: 13 }}>취소</button>
+              <button onClick={handleConfirmUpload} style={{ ...S.btnPrimary, flex: 1, fontSize: 13 }}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -695,9 +695,9 @@ function CheckItem({ label, defaultChecked }) {
 
 function OngoingPage({ onNavTo }) {
   const docsInitial = [
-    { title:"국가장학금 신청", upload:"2026.03.14", deadline:"2026-03-22 17:00 · D-3", dc: C.red, db: C.redBg,
+    { title:"국가장학금 신청", upload:"2026.03.14", deadline:"2026-03-22 17:00 · D-3", dc: C.red, db: C.redBg, scheduleDay: 22,
       checks:[{l:"소득분위 확인서 제출"},{l:"학교 포털 신청서 작성 완료"},{l:"주민등록등본 업로드"},{l:"가족관계증명서 제출"},{l:"재학증명서 제출"}], total:5 },
-    { title:"졸업예비심사 신청", upload:"2026.03.10", deadline:"2026-03-22 18:00 · D-8", dc:"#EA580C", db:"#FFF7ED",
+    { title:"졸업예비심사 신청", upload:"2026.03.10", deadline:"2026-03-22 18:00 · D-8", dc:"#EA580C", db:"#FFF7ED", scheduleDay: 22,
       checks:[{l:"졸업논문 계획서 초안 작성"},{l:"지도교수 확인서 수령"},{l:"학교 포털 심사 신청"}], total:3 },
   ];
 
@@ -732,7 +732,10 @@ function OngoingPage({ onNavTo }) {
           return (
             <div key={doc.title} style={S.card}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                <div><div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{doc.title}</div><div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div></div>
+                <div onClick={() => onNavTo("schedule-detail", doc.scheduleDay)} style={{ cursor: "pointer", flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.purple, textDecoration: "underline" }}>{doc.title}</div>
+                  <div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div>
+                </div>
                 <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12 }}>

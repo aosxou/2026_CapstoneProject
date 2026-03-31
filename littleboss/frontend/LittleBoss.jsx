@@ -982,7 +982,7 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                 <input type="checkbox" checked={checks[idx] || false} onChange={() => toggleCheck(idx)} style={{ accentColor: data.color, width: 16, height: 16 }} />
-                <span style={{ textDecoration: checks[idx] ? "line-through" : "none", color: checks[idx] ? C.textLight : C.textMid }}>{doc}</span>
+                <span style={{ color: C.textMid }}>{doc}</span>
               </label>
             ))}
           </div>
@@ -1299,7 +1299,7 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                 <input type="checkbox" checked={checks[idx] || false} onChange={() => toggleCheck(idx)} style={{ accentColor: statusColor, width: 16, height: 16 }} />
-                <span style={{ textDecoration: checks[idx] ? "line-through" : "none", color: checks[idx] ? C.textLight : C.textMid }}>{doc}</span>
+                <span style={{ color: C.textMid }}>{doc}</span>
               </label>
             ))}
           </div>

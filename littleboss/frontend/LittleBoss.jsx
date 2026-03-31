@@ -154,7 +154,7 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
     return () => document.removeEventListener("click", h);
   }, []);
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 50, background: C.white, borderBottom: `1px solid ${C.purpleBorder}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16 }}>
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 50, background: C.white, borderBottom: `1px solid ${C.purpleBorder}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16, minWidth: "1200px" }}>
       <div onClick={() => onNavTo("sub-home")} style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 700, fontSize: 17, color: C.text, width: 200, flexShrink: 0, cursor: "pointer" }}>
         <img src={logo} alt="LittleBoss" style={{ width: 44, height: 44, borderRadius: 8 }} />
         LittleBoss

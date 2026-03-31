@@ -1503,7 +1503,7 @@ export default function App() {
       <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div style={{ display: "flex", paddingTop: 58, minHeight: "calc(100vh - 58px)", minWidth: "1200px" }}>
         <Sidebar currentSub={sub} onNavTo={navTo} sidebarOpen={sidebarOpen} />
-        <main style={{ marginLeft: sidebarOpen ? 200 : 0, flex: 1, padding: "28px 28px 40px 48px", transition: "marginLeft 0.25s" }}>
+        <main style={{ marginLeft: sidebarOpen ? 200 : 0, flex: 1, padding: "28px 28px 40px 48px", transition: "marginLeft 0.3s ease" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.textLight, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{titleMap[sub]}</div>
           {sub === "sub-home" && <Dashboard onNavTo={navTo} />}
           {sub === "sub-upload" && <UploadPage onNavTo={navTo} />}

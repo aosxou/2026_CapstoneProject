@@ -783,7 +783,7 @@ function OngoingPage({ onNavTo }) {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12 }}>
                 {doc.checks.map((c, idx) => (
-                  <label key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: checked[idx] ? C.textLight : C.textMid, cursor: "pointer", textDecoration: checked[idx] ? "line-through" : "none" }}>
+                  <label key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid, cursor: "pointer" }}>
                     <input type="checkbox" checked={checked[idx]} onChange={() => toggleCheck(doc.title, idx)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
                     {c.l}
                   </label>
@@ -864,7 +864,7 @@ function ExpiredPage({ onNavTo }) {
               <div style={{ fontSize: 12, color: C.textLight, marginBottom: 14 }}>📎 업로드: {doc.upload} · 마감: {doc.deadline}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {doc.checks.map((c, idx) => (
-                  <label key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: checked[idx] ? C.textLight : C.textMid, cursor: "pointer", textDecoration: checked[idx] ? "line-through" : "none" }}>
+                  <label key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid, cursor: "pointer" }}>
                     <input type="checkbox" checked={checked[idx]} onChange={() => toggleCheck(doc.title, idx)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
                     {c.l}
                   </label>

@@ -299,7 +299,7 @@ function Dashboard({ onNavTo }) {
     else setMonth(month + 1);
   };
 
-  const eventDates = { 3: { 19: "gray", 22: "purple", 27: "green" } };
+  const eventDates = { 3: { 19: "sky", 22: "gray", 27: "green" } };
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
   const calendarDays = [];
@@ -355,7 +355,7 @@ function Dashboard({ onNavTo }) {
                 <span style={{ color: C.textLight }}>완료</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.purple }}></div>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.textLight }}></div>
                 <span style={{ color: C.textLight }}>미완료</span>
               </div>
             </div>
@@ -384,8 +384,8 @@ function Dashboard({ onNavTo }) {
             {["일","월","화","수","목","금","토"].map(d => <div key={d} style={{ fontSize: 10, color: C.textLight, paddingBottom: 6 }}>{d}</div>)}
             {calendarDays.map((d, i) => {
               const eventColor = eventDates[month]?.[d];
-              const colorMap = { red: C.red, purple: C.purple, green: C.green, gray: C.textLight };
-              const bgColorMap = { red: C.redBg, purple: C.purpleBg, green: C.greenBg, gray: "#E5E7EB" };
+              const colorMap = { red: C.red, purple: C.purple, green: C.green, gray: C.textLight, sky: "#0EA5E9" };
+              const bgColorMap = { red: C.redBg, purple: C.purpleBg, green: C.greenBg, gray: "#E5E7EB", sky: "#E0F2FE" };
               return (
                 <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: eventColor ? colorMap[eventColor] : C.textMid, fontWeight: eventColor ? 600 : 400, width: 24, height: 24, borderRadius: "50%", background: eventColor ? bgColorMap[eventColor] : "transparent", margin: "0 auto" }}>
                   {d}

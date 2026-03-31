@@ -983,7 +983,7 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
         <div style={{ ...S.card }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
-            <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+            <button style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
@@ -1306,7 +1306,7 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
         <div style={{ ...S.card }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
-            <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+            <button style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (

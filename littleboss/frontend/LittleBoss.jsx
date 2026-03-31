@@ -523,14 +523,23 @@ function UploadPage({ onNavTo }) {
 
   const handleConfirmUpload = () => {
     addFiles(fileToUpload);
-    setUploadConfirm(false);
-    setFileToUpload(null);
+    // 팝업은 열린 상태로 유지하여 업로드 진행 상황 표시
   };
 
   const handleCancelUpload = () => {
     setUploadConfirm(false);
     setFileToUpload(null);
   };
+
+  // 모든 파일 업로드 완료 시 팝업 자동 닫기
+  useEffect(() => {
+    if (uploadConfirm && queue.length > 0 && queue.every(f => f.progress === 100)) {
+      setTimeout(() => {
+        setUploadConfirm(false);
+        setFileToUpload(null);
+      }, 800);
+    }
+  }, [queue, uploadConfirm]);
   return (
     <div>
       <div style={{ marginBottom: 24 }}><div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>문서 업로드</div><div style={{ fontSize: 14, color: C.textLight }}>분석할 문서를 업로드하면 AI가 서류·마감일을 자동 추출합니다.</div></div>
@@ -581,7 +590,7 @@ function UploadPage({ onNavTo }) {
       </div>
 
       {/* 업로드 확인 팝업 */}
-      {uploadConfirm && fileToUpload && (
+      {uploadConfirm && fileToUpload && queue.length === 0 && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
           <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 380, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>파일 업로드</div>
@@ -594,6 +603,35 @@ function UploadPage({ onNavTo }) {
               <button onClick={handleCancelUpload} style={{ ...S.btnOutline, flex: 1, fontSize: 13 }}>취소</button>
               <button onClick={handleConfirmUpload} style={{ ...S.btnPrimary, flex: 1, fontSize: 13 }}>확인</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 업로드 진행 중 팝업 */}
+      {uploadConfirm && queue.length > 0 && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 420, boxShadow: "0 20px 48px rgba(0,0,0,0.2)", maxHeight: 500, overflowY: "auto" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, textAlign: "center" }}>파일 업로드 중</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {queue.map(f => (
+                <div key={f.id} style={{ background: C.purpleBg, borderRadius: 10, padding: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 18 }}>📄</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: C.text }}>{f.name}</div>
+                      <div style={{ fontSize: 10, color: C.textLight, marginTop: 2 }}>{f.size}</div>
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.purple, minWidth: 40, textAlign: "right" }}>{Math.round(f.progress)}%</div>
+                  </div>
+                  <div style={{ height: 4, background: "#E5E7EB", borderRadius: 2 }}>
+                    <div style={{ height: "100%", borderRadius: 2, background: C.purple, width: f.progress + "%", transition: "width .3s" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {queue.every(f => f.progress === 100) && (
+              <div style={{ textAlign: "center", marginTop: 20, fontSize: 14, color: C.green, fontWeight: 600 }}>✅ 업로드 완료</div>
+            )}
           </div>
         </div>
       )}

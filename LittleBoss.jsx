@@ -170,7 +170,7 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 12, color: C.textMid, background: C.purpleBg, padding: "5px 12px", borderRadius: 20 }}>☀️ 오늘은 맑습니다</span>
           <div style={{ position: "relative" }}>
-            <button onClick={e => { e.stopPropagation(); setNotifOpen(!notifOpen); }} style={{ width: 36, height: 36, borderRadius: 10, background: C.purpleBg, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: C.purple, position: "relative" }}>
+            <button onClick={e => { e.stopPropagation(); setNotifOpen(!notifOpen); setDd(false); }} style={{ width: 36, height: 36, borderRadius: 10, background: C.purpleBg, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: C.purple, position: "relative" }}>
               🔔<span style={{ position: "absolute", top: 7, right: 7, width: 7, height: 7, borderRadius: "50%", background: C.red, border: "1.5px solid white" }} />
             </button>
             {notifOpen && (
@@ -222,7 +222,7 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
               </div>
             )}
           </div>
-          <div style={{ position: "relative" }} onClick={e => { e.stopPropagation(); setDd(p => !p); }}>
+          <div style={{ position: "relative" }} onClick={e => { e.stopPropagation(); setDd(p => !p); setNotifOpen(false); }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "4px 10px 4px 4px", borderRadius: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 13, fontWeight: 700 }}>이</div>
               <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>이가윤</span>

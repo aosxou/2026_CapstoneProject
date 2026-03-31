@@ -156,11 +156,11 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen,
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 50, background: C.white, borderBottom: `1px solid ${C.purpleBorder}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16, minWidth: "1200px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ width: 36, height: 36, borderRadius: 8, border: "none", background: C.purpleBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: C.purple, transition: "all 0.3s ease", transform: sidebarOpen ? "scale(1) rotate(0deg)" : "scale(1.1) rotate(90deg)" }}>☰</button>
         <div onClick={() => onNavTo("sub-home")} style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 700, fontSize: 17, color: C.text, cursor: "pointer" }}>
           <img src={logo} alt="LittleBoss" style={{ width: 44, height: 44, borderRadius: 8 }} />
           LittleBoss
         </div>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ width: 36, height: 36, borderRadius: 8, border: "none", background: C.purpleBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: C.purple }}>☰</button>
       </div>
       <span style={{ fontWeight: 700, fontSize: 15, color: C.text }} id="header-title"></span>
       <div style={{ flex: 1 }} />

@@ -495,6 +495,7 @@ function UploadPage({ onNavTo }) {
   const [uploadConfirm, setUploadConfirm] = useState(false);
   const [fileToUpload, setFileToUpload] = useState(null);
   const [checkedFiles, setCheckedFiles] = useState({});
+  const fileInputRef = useRef(null);
   const recentFiles = [
     { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false },
     { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true },
@@ -553,7 +554,7 @@ function UploadPage({ onNavTo }) {
             <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>여기에 파일을 드래그 & 드롭하세요</div>
             <div style={{ fontSize: 13, color: C.textLight, lineHeight: 1.6 }}>또는 아래 버튼으로 파일을 선택하세요<br/>PDF, JPG, PNG, DOCX 지원 · 최대 20MB</div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 24 }}>
-              <label style={{ ...S.btnPrimary, padding: "10px 20px" }}>📁 파일 선택<input type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleFileSelect(e.target.files)} /></label>
+              <label style={{ ...S.btnPrimary, padding: "10px 20px" }}>📁 파일 선택<input ref={fileInputRef} type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleFileSelect(e.target.files)} /></label>
             </div>
             <div style={{ fontSize: 11, color: C.textLight, marginTop: 12 }}>지원 형식: PDF · DOCX · JPG · PNG · HWP</div>
           </div>
@@ -571,7 +572,7 @@ function UploadPage({ onNavTo }) {
             ))}
             {queue.length > 0 && (
               <div style={{ display: "flex", gap: 10, marginTop: 10, justifyContent: "flex-end" }}>
-                <button onClick={() => setQueue([])} style={{ ...S.btnOutline, fontSize: 13 }}>업로드 취소</button>
+                <button onClick={() => { setQueue([]); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ ...S.btnOutline, fontSize: 13 }}>업로드 취소</button>
                 <button onClick={() => {}} style={{ ...S.btnPrimary, fontSize: 13, justifyContent: "center" }}>분석하기</button>
               </div>
             )}

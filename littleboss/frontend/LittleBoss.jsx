@@ -565,7 +565,7 @@ function UploadPage({ onNavTo }) {
                   <div style={{ fontSize: 11, color: C.textLight, marginTop: 2 }}>{f.size}</div>
                   <div style={{ height: 3, background: "#EDE9FF", borderRadius: 2, marginTop: 6 }}><div style={{ height: "100%", borderRadius: 2, background: C.purple, width: f.progress + "%", transition: "width .3s" }} /></div>
                 </div>
-                <button onClick={() => setQueue(q => q.filter(i => i.id !== f.id))} style={{ width: 24, height: 24, borderRadius: 6, border: "none", background: "#F5F3FF", cursor: "pointer", fontSize: 14, color: C.textLight }}>✕</button>
+                <input type="checkbox" onChange={(e) => { if(e.target.checked) setQueue(q => q.filter(i => i.id !== f.id)); }} style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.purple }} />
               </div>
             ))}
           </div>

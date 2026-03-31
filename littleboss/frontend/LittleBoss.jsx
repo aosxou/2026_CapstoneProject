@@ -981,7 +981,10 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
 
         {/* 오른쪽: 필요 서류 */}
         <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📄 필요 서류</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
+            <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
@@ -998,7 +1001,10 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
 
       {/* 메모 */}
       <div style={{ ...S.card, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📝 메모</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>📝 메모</div>
+          <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+        </div>
         <textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
@@ -1298,7 +1304,10 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
 
         {/* 오른쪽: 필요 서류 */}
         <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📄 필요 서류</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
+            <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
@@ -1315,7 +1324,10 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
 
       {/* 메모 */}
       <div style={{ ...S.card, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📝 메모</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>📝 메모</div>
+          <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+        </div>
         <textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}

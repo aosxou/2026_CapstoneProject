@@ -748,24 +748,15 @@ function OngoingPage({ onNavTo }) {
       checks:[{l:"졸업논문 계획서 초안 작성"},{l:"지도교수 확인서 수령"},{l:"학교 포털 심사 신청"}], total:3 },
   ];
 
-  const [checkStates, setCheckStates] = useState(
-    Object.fromEntries(docsInitial.map(doc => {
-      const initialChecks = Array(doc.total).fill(false);
-      // 국가장학금 신청: 처음 2개 기본 선택
-      if (doc.title === "국가장학금 신청") {
-        initialChecks[0] = true;
-        initialChecks[1] = true;
-      }
-      return [doc.title, initialChecks];
-    }))
-  );
-
-  const toggleCheck = (docTitle, idx) => {
-    setCheckStates(prev => ({
-      ...prev,
-      [docTitle]: prev[docTitle].map((val, i) => i === idx ? !val : val)
-    }));
-  };
+  const checkStates = Object.fromEntries(docsInitial.map(doc => {
+    const initialChecks = Array(doc.total).fill(false);
+    // 국가장학금 신청: 처음 2개 기본 선택
+    if (doc.title === "국가장학금 신청") {
+      initialChecks[0] = true;
+      initialChecks[1] = true;
+    }
+    return [doc.title, initialChecks];
+  }));
 
   return (
     <div>
@@ -777,10 +768,10 @@ function OngoingPage({ onNavTo }) {
           const percentage = (doneCount / doc.total) * 100;
 
           return (
-            <div key={doc.title} style={S.card}>
+            <div key={doc.title} onClick={() => onNavTo("schedule-detail", doc.scheduleDay)} style={{ ...S.card, cursor: "pointer" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                <div onClick={() => onNavTo("schedule-detail", doc.scheduleDay)} style={{ cursor: "pointer", flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.purple, textDecoration: "underline" }}>{doc.title}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.text }}>{doc.title}</div>
                   <div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div>
                 </div>
                 <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
@@ -788,7 +779,7 @@ function OngoingPage({ onNavTo }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12 }}>
                 {doc.checks.map((c, idx) => (
                   <div key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid }}>
-                    <input type="checkbox" checked={checked[idx]} onChange={() => toggleCheck(doc.title, idx)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
+                    <input type="checkbox" checked={checked[idx]} disabled style={{ accentColor: C.purple, width: 15, height: 15, cursor: "not-allowed", opacity: 0.6 }} />
                     <span>{c.l}</span>
                   </div>
                 ))}

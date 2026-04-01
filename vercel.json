@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd littleboss/frontend && npm install && npm run build",
+  "buildCommand": "cd littleboss/frontend && npm run build",
   "outputDirectory": "littleboss/frontend/dist",
   "installCommand": "cd littleboss/frontend && npm install"
 }

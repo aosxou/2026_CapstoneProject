@@ -914,6 +914,7 @@ function ExpiredPage({ onNavTo }) {
 function ScheduleDetailPage({ day, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
+  const { toast } = useToast();
 
   // 로드
   useEffect(() => {
@@ -955,6 +956,13 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
     setChecks(p => ({ ...p, [idx]: !p[idx] }));
   };
 
+  const handleSave = () => {
+    const key = `scheduleDetail_${day}`;
+    const data = JSON.stringify({ memo, checks });
+    localStorage.setItem(key, data);
+    toast("저장되었습니다!");
+  };
+
   const completedCount = Object.values(checks).filter(Boolean).length;
 
   return (
@@ -983,7 +991,7 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
         <div style={{ ...S.card }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
-            <button style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
+            <button onClick={handleSave} style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
@@ -1003,7 +1011,7 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
       <div style={{ ...S.card, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ fontSize: 14, fontWeight: 700 }}>📝 메모</div>
-          <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+          <button onClick={handleSave} style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
         </div>
         <textarea
           value={memo}
@@ -1237,6 +1245,7 @@ function DocumentAnalysisPage({ fileId, onNavTo }) {
 function DocumentDetailPage({ data, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
+  const { toast } = useToast();
 
   // 로드
   useEffect(() => {
@@ -1279,6 +1288,13 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
   const completedCount = Object.values(checks).filter(Boolean).length;
   const statusColor = completedCount === data.total ? C.green : completedCount > 0 ? "#EA580C" : C.red;
 
+  const handleSave = () => {
+    const key = `documentDetail_${data.title}`;
+    const saveData = JSON.stringify({ memo, checks });
+    localStorage.setItem(key, saveData);
+    toast("저장되었습니다!");
+  };
+
   return (
     <div>
       {/* 헤더 */}
@@ -1306,7 +1322,7 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
         <div style={{ ...S.card }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
-            <button style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
+            <button onClick={handleSave} style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
@@ -1326,7 +1342,7 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
       <div style={{ ...S.card, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ fontSize: 14, fontWeight: 700 }}>📝 메모</div>
-          <button style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+          <button onClick={handleSave} style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
         </div>
         <textarea
           value={memo}

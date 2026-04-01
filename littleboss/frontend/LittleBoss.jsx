@@ -960,7 +960,7 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
     const key = `scheduleDetail_${day}`;
     const data = JSON.stringify({ memo, checks });
     localStorage.setItem(key, data);
-    toast("저장되었습니다!");
+    alert("저장되었습니다!");
   };
 
   const completedCount = Object.values(checks).filter(Boolean).length;
@@ -1292,7 +1292,7 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
     const key = `documentDetail_${data.title}`;
     const saveData = JSON.stringify({ memo, checks });
     localStorage.setItem(key, saveData);
-    toast("저장되었습니다!");
+    alert("저장되었습니다!");
   };
 
   return (
@@ -1383,6 +1383,7 @@ function ProfilePage() {
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
 
   const handleSave = () => {
+    alert("저장되었습니다!");
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 2000);
   };

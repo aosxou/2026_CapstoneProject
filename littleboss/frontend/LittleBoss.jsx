@@ -675,6 +675,8 @@ function SchedulePage({ onNavTo }) {
             const eventTitles = { 17: "국가장학금", 22: "졸업예비심사", 27: "근로장학금" };
             const bgColorMap = { incomplete: "#F5F5F5", ongoing: "#FFF7ED", completed: C.greenBg };
             const colorMap = { incomplete: "#999", ongoing: "#EA580C", completed: C.green, today: "#0066CC" };
+            const dotColorMap = { incomplete: "#E5E7EB", ongoing: "#FFF7ED", completed: C.greenBg, today: "#E0F2FE" };
+            const dotBorderMap = { incomplete: "#D1D5DB", ongoing: "#FECACA", completed: "#BBDF84", today: "#B3D9FF" };
             return (
               <div key={i} onClick={() => sp && sp !== "today" && onNavTo('schedule-detail', d)} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", fontSize: 13, borderRadius: 8, cursor: sp && sp !== "today" ? "pointer" : "default", padding: 8,
                 color: isOther ? "#CCC" : sp === "today" ? "#0066CC" : colorMap[sp] || C.textMid,
@@ -683,8 +685,8 @@ function SchedulePage({ onNavTo }) {
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
-                  {sp === "today" && (
-                    <div style={{ position: "absolute", right: -4, top: 2, width: 6, height: 6, borderRadius: "50%", background: "#E0F2FE", border: "1px solid #B3D9FF" }}></div>
+                  {sp && (
+                    <div style={{ position: "absolute", right: -4, top: 2, width: 6, height: 6, borderRadius: "50%", background: dotColorMap[sp], border: `1px solid ${dotBorderMap[sp]}` }}></div>
                   )}
                 </div>
                 {sp && sp !== "today" && (

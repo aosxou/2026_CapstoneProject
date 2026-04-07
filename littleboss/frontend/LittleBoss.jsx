@@ -500,11 +500,11 @@ function UploadPage({ onNavTo }) {
   const [checkedFiles, setCheckedFiles] = useState({});
   const fileInputRef = useRef(null);
   const recentFiles = [
-    { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false },
-    { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true },
-    { id: 3, icon: "🖼️", name: "졸업예비심사_공지.jpg", date: "2026.02.10", done: true },
-    { id: 4, icon: "📄", name: "복지장학금_안내문.pdf", date: "2026.01.22", done: true },
-    { id: 5, icon: "📝", name: "휴학신청_양식.docx", date: "2026.01.08", done: true },
+    { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false, scheduleTitle: "국가장학금 신청" },
+    { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true, scheduleTitle: "근로장학금 신청" },
+    { id: 3, icon: "🖼️", name: "졸업예비심사_공지.jpg", date: "2026.02.10", done: true, scheduleTitle: "졸업예비심사 신청" },
+    { id: 4, icon: "📄", name: "복지장학금_안내문.pdf", date: "2026.01.22", done: true, scheduleTitle: null },
+    { id: 5, icon: "📝", name: "휴학신청_양식.docx", date: "2026.01.08", done: true, scheduleTitle: null },
   ];
   const addFiles = (files) => {
     const newItems = [...files].map(f => ({ name: f.name, size: f.size > 1048576 ? (f.size/1048576).toFixed(1)+"MB" : (f.size/1024).toFixed(0)+"KB", progress: 0, id: Date.now() + f.name }));
@@ -586,7 +586,7 @@ function UploadPage({ onNavTo }) {
           <div style={{ padding: "16px 18px", borderBottom: `1px solid ${C.purpleBorder}`, fontSize: 13, fontWeight: 700 }}>📋 분석 완료 파일</div>
           <div style={{ padding: 8, maxHeight: 520, overflowY: "auto" }}>
             {recentFiles.map(f => (
-              <div key={f.id} onClick={() => onNavTo("doc-analysis", f.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px", borderRadius: 9, cursor: "pointer", marginBottom: 2, transition: "all 0.2s", background: "transparent", hover: { background: C.purpleBg } }}>
+              <div key={f.id} onClick={() => f.scheduleTitle && onNavTo("schedule-detail", f.scheduleTitle)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px", borderRadius: 9, cursor: f.scheduleTitle ? "pointer" : "default", marginBottom: 2, transition: "all 0.2s", background: "transparent", opacity: f.scheduleTitle ? 1 : 0.5, hover: f.scheduleTitle ? { background: C.purpleBg } : {} }}>
                 <span style={{ fontSize: 20 }}>{f.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
@@ -1146,102 +1146,6 @@ function NotificationAnalysisPage({ onNavTo }) {
   );
 }
 
-function DocumentAnalysisPage({ fileId, onNavTo }) {
-  const fileAnalysisMap = {
-    1: { icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", analyzed: "2026.03.19 14:23", done: false, items: [
-      { item: "소득분위 확인서", status: "완료", icon: "✅" },
-      { item: "가족관계증명서", status: "미제출", icon: "❌" },
-      { item: "재학증명서", status: "미제출", icon: "❌" },
-      { item: "주민등록등본", status: "완료", icon: "✅" },
-      { item: "신청서 작성", status: "완료", icon: "✅" }
-    ]},
-    2: { icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", analyzed: "2026.03.10 10:15", done: true, items: [
-      { item: "신청서 작성", status: "완료", icon: "✅" },
-      { item: "통장 사본", status: "완료", icon: "✅" },
-      { item: "신원증 사본", status: "완료", icon: "✅" }
-    ]},
-    3: { icon: "🖼️", name: "졸업예비심사_공지.jpg", date: "2026.02.10", analyzed: "2026.02.28 09:45", done: true, items: [
-      { item: "졸업논문 계획서", status: "완료", icon: "✅" },
-      { item: "지도교수 확인서", status: "완료", icon: "✅" },
-      { item: "학적 기록부", status: "완료", icon: "✅" }
-    ]},
-    4: { icon: "📄", name: "복지장학금_안내문.pdf", date: "2026.01.22", analyzed: "2026.02.10 16:20", done: true, items: [
-      { item: "가계소득 증명서", status: "완료", icon: "✅" },
-      { item: "부채 증명서", status: "완료", icon: "✅" }
-    ]},
-    5: { icon: "📝", name: "휴학신청_양식.docx", date: "2026.01.08", analyzed: "2026.01.15 11:30", done: true, items: [
-      { item: "휴학 신청서", status: "완료", icon: "✅" },
-      { item: "학생증 사본", status: "완료", icon: "✅" }
-    ]}
-  };
-
-  const file = fileAnalysisMap[fileId];
-  if (!file) return <div>파일을 찾을 수 없습니다</div>;
-
-  const completedCount = file.items.filter(i => i.status === "완료").length;
-
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <div>
-          <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>📄 {file.name}</div>
-          <div style={{ fontSize: 14, color: C.textLight }}>문서 분석 결과</div>
-        </div>
-        <button onClick={() => onNavTo('sub-upload')} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
-        <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>📄 문서 정보</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 12 }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 600, marginBottom: 4 }}>파일명</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{file.name}</div>
-            </div>
-            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 12 }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 600, marginBottom: 4 }}>업로드 날짜</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{file.date}</div>
-            </div>
-            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 12 }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 600, marginBottom: 4 }}>분석 완료</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{file.analyzed}</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>🎯 분석 결과</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ padding: 12, background: C.greenBg, borderRadius: 8, borderLeft: `3px solid ${C.green}` }}>
-              <div style={{ fontSize: 12, color: C.green, fontWeight: 600, marginBottom: 4 }}>완료율</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{completedCount} / {file.items.length} · {Math.round(completedCount/file.items.length*100)}%</div>
-            </div>
-            <div style={{ padding: 12, background: file.done ? C.greenBg : C.redBg, borderRadius: 8, borderLeft: `3px solid ${file.done ? C.green : C.red}` }}>
-              <div style={{ fontSize: 12, color: file.done ? C.green : C.red, fontWeight: 600, marginBottom: 4 }}>상태</div>
-              <div style={{ fontSize: 12, color: C.textMid }}>{file.done ? "분석 완료" : "분석 진행 중"}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ ...S.card }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📋 상세 분석</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {file.items.map((item, idx) => (
-            <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", background: C.purpleBg, borderRadius: 8, borderLeft: `3px solid ${C.purple}`, fontSize: 13 }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 16 }}>✅</span>
-                <span style={{ color: C.text, fontWeight: 500 }}>{item.item}</span>
-              </span>
-              <span style={{ color: C.purple, fontWeight: 600, fontSize: 12 }}>필요</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DocumentDetailPage({ data, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
@@ -1498,15 +1402,14 @@ export default function App() {
   const [scheduleDetailDay, setScheduleDetailDay] = useState(null);
   const [scheduleDetailTitle, setScheduleDetailTitle] = useState(null);
   const [docDetailData, setDocDetailData] = useState(null);
-  const [docAnalysisId, setDocAnalysisId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { msg, show, toast } = useToast();
 
-  const titleMap = { "sub-home":"대시보드","sub-upload":"문서 업로드","sub-schedule":"일정 관리","sub-ongoing":"진행 중인 문서","sub-expired":"마감된 문서","sub-profile":"내 정보", "schedule-detail":"일정 상세", "doc-detail":"문서 상세", "notif-announcement":"공지사항", "notif-analysis":"문서 분석 결과", "doc-analysis":"문서 분석 결과" };
+  const titleMap = { "sub-home":"대시보드","sub-upload":"문서 업로드","sub-schedule":"일정 관리","sub-ongoing":"진행 중인 문서","sub-expired":"마감된 문서","sub-profile":"내 정보", "schedule-detail":"일정 상세", "doc-detail":"문서 상세", "notif-announcement":"공지사항", "notif-analysis":"문서 분석 결과" };
 
   const handleLogin = (m) => { setPage("app"); setSub("sub-home"); toast(m); };
   const handleLogout = () => { setPage("login"); toast("로그아웃됐어요"); };
-  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) { if(typeof detailDay === 'number') setScheduleDetailDay(detailDay); else setScheduleDetailTitle(detailDay); } if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
+  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) { if(typeof detailDay === 'number') setScheduleDetailDay(detailDay); else setScheduleDetailTitle(detailDay); } if(data) setDocDetailData(data); };
 
   // 히스토리 관리
   useEffect(() => {
@@ -1545,7 +1448,6 @@ export default function App() {
           {sub === "doc-detail" && <DocumentDetailPage data={docDetailData} prevSub={prevSub} onNavTo={navTo} />}
           {sub === "notif-announcement" && <NotificationAnnouncementPage onNavTo={navTo} />}
           {sub === "notif-analysis" && <NotificationAnalysisPage onNavTo={navTo} />}
-          {sub === "doc-analysis" && <DocumentAnalysisPage fileId={docAnalysisId} onNavTo={navTo} />}
           {sub === "sub-profile" && <ProfilePage />}
         </main>
       </div>

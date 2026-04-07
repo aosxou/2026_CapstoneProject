@@ -675,14 +675,24 @@ function SchedulePage({ onNavTo }) {
             const eventTitles = { 17: "국가장학금", 22: "졸업예비심사", 27: "근로장학금" };
             const bgColorMap = { incomplete: "#F5F5F5", ongoing: "#FFF7ED", completed: C.greenBg };
             const colorMap = { incomplete: "#999", ongoing: "#EA580C", completed: C.green };
+
+            // 오늘 날짜는 동그라미로 표시
+            if (sp === "today") {
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#0066CC", fontWeight: 700, width: 32, height: 32, borderRadius: "50%", background: "#E0F2FE", margin: "0 auto" }}>
+                  {d}
+                </div>
+              );
+            }
+
             return (
-              <div key={i} onClick={() => sp && sp !== "today" && onNavTo('schedule-detail', d)} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", fontSize: 13, borderRadius: 8, cursor: sp && sp !== "today" ? "pointer" : "default", padding: 8,
-                color: isOther ? "#CCC" : sp === "today" ? "#0066CC" : colorMap[sp] || C.textMid,
-                background: sp === "today" ? "#B3D9FF" : bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: (sp && sp !== "today") ? 1 : 0.8, transform: "none" }}
-                onMouseEnter={(e) => { if (sp && sp !== "today") { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}}
+              <div key={i} onClick={() => sp && onNavTo('schedule-detail', d)} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", fontSize: 13, borderRadius: 8, cursor: sp ? "pointer" : "default", padding: 8,
+                color: isOther ? "#CCC" : colorMap[sp] || C.textMid,
+                background: bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: sp ? 1 : 0.8, transform: "none" }}
+                onMouseEnter={(e) => { if (sp) { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
                 <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
-                {sp && sp !== "today" && (
+                {sp && (
                   <span style={{ fontSize: 9, fontWeight: 500, color: colorMap[sp] || C.purple, marginTop: 4, lineHeight: 1.2 }}>
                     {eventTitles[d]}
                   </span>

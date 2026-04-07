@@ -679,8 +679,10 @@ function SchedulePage({ onNavTo }) {
             // 오늘 날짜는 동그라미로 표시
             if (sp === "today") {
               return (
-                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#0066CC", fontWeight: 700, width: 32, height: 32, borderRadius: "50%", background: "#E0F2FE", margin: "0 auto" }}>
-                  {d}
+                <div key={i} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontSize: 13, borderRadius: 8, cursor: "default", padding: 8, background: "transparent", fontWeight: 700, position: "relative", transition: "all 0.2s", opacity: 1, transform: "none" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#0066CC", fontWeight: 700, width: 32, height: 32, borderRadius: "50%", background: "#E0F2FE" }}>
+                    {d}
+                  </div>
                 </div>
               );
             }

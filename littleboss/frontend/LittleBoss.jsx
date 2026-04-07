@@ -1287,7 +1287,6 @@ function ProfilePage() {
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
 
   const handleSave = () => {
-    alert("저장되었습니다!");
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 2000);
   };

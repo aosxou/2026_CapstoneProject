@@ -1321,10 +1321,12 @@ function ProfilePage() {
       };
       reader.readAsDataURL(file);
     }
+    // 같은 파일을 다시 선택할 수 있도록 input 초기화
+    e.target.value = '';
   };
 
   const handleImageConfirm = () => {
-    // Canvas로 원형 이미지 생성
+    // Canvas로 원형 이미지 생성 (미리보기와 동일한 계산)
     try {
       const canvas = document.createElement('canvas');
       const size = 200;
@@ -1350,17 +1352,34 @@ function ProfilePage() {
       img.onload = function() {
         try {
           const editorSize = 380;
-          const ratio = size / editorSize;
+          const previewSize = 140; // 미리보기 크기
 
+          // 미리보기와 동일한 비율로 계산
+          const scaleRatio = size / previewSize;
+
+          // 미리보기에서 사용한 동일한 계산
+          const imgScaledPercent = 100 * imageScale;
           const scaledWidth = img.width * imageScale;
           const scaledHeight = img.height * imageScale;
-          const editorCenterX = editorSize / 2;
-          const editorCenterY = editorSize / 2;
 
-          const drawX = (editorCenterX - scaledWidth / 2 + imagePosition.x) * ratio;
-          const drawY = (editorCenterY - scaledHeight / 2 + imagePosition.y) * ratio;
+          // 편집 영역 기준으로 계산
+          const offsetX = imagePosition.x * (previewSize / editorSize) * scaleRatio;
+          const offsetY = imagePosition.y * (previewSize / editorSize) * scaleRatio;
 
-          ctx.drawImage(img, drawX, drawY, scaledWidth * ratio, scaledHeight * ratio);
+          const drawWidth = scaledWidth * (previewSize / editorSize) * scaleRatio;
+          const drawHeight = scaledHeight * (previewSize / editorSize) * scaleRatio;
+
+          // 중앙 정렬
+          const centerX = (size - drawWidth) / 2;
+          const centerY = (size - drawHeight) / 2;
+
+          ctx.drawImage(
+            img,
+            centerX + offsetX,
+            centerY + offsetY,
+            drawWidth,
+            drawHeight
+          );
 
           const result = canvas.toDataURL('image/png');
           setProfileImage(result);

@@ -684,7 +684,7 @@ function SchedulePage({ onNavTo }) {
                 <div style={{ position: "relative", display: "inline-block" }}>
                   <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
                   {sp === "today" && (
-                    <div style={{ position: "absolute", right: -3, top: -3, width: 6, height: 6, borderRadius: "50%", background: "#E0F2FE", border: "1px solid #B3D9FF" }}></div>
+                    <div style={{ position: "absolute", right: -4, top: 2, width: 6, height: 6, borderRadius: "50%", background: "#E0F2FE", border: "1px solid #B3D9FF" }}></div>
                   )}
                 </div>
                 {sp && sp !== "today" && (

@@ -1558,7 +1558,12 @@ function ProfilePage() {
               {/* 이미지 편집 */}
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>이미지 조정</div>
-                <div style={{ width: "100%", height: 380, borderRadius: 10, overflow: "hidden", border: `2px dashed ${C.border}`, position: "relative", background: "#F9F9F9" }}>
+                <div
+                  style={{ width: "100%", height: 380, borderRadius: 10, overflow: "hidden", border: `2px dashed ${C.border}`, position: "relative", background: "#F9F9F9", cursor: isDragging ? "grabbing" : "grab" }}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                >
                   <img
                     src={tempImage}
                     draggable={false}

@@ -1326,10 +1326,10 @@ function ProfilePage() {
   };
 
   const handleImageConfirm = () => {
-    // Canvas로 원형 이미지 생성 (미리보기와 동일한 계산)
+    // Canvas로 원형 이미지 생성 (미리보기와 동일한 크기/계산)
     try {
       const canvas = document.createElement('canvas');
-      const size = 200;
+      const size = 140; // 미리보기와 동일한 크기
       canvas.width = size;
       canvas.height = size;
 
@@ -1352,31 +1352,22 @@ function ProfilePage() {
       img.onload = function() {
         try {
           const editorSize = 380;
-          const previewSize = 140; // 미리보기 크기
-
-          // 미리보기와 동일한 비율로 계산
-          const scaleRatio = size / previewSize;
-
-          // 미리보기에서 사용한 동일한 계산
-          const imgScaledPercent = 100 * imageScale;
           const scaledWidth = img.width * imageScale;
           const scaledHeight = img.height * imageScale;
 
-          // 편집 영역 기준으로 계산
-          const offsetX = imagePosition.x * (previewSize / editorSize) * scaleRatio;
-          const offsetY = imagePosition.y * (previewSize / editorSize) * scaleRatio;
+          // 편집 영역에서의 위치를 캔버스 크기(140px)에 맞게 변환
+          // 미리보기와 동일한 계산: left: imagePosition.x * (140/380)
+          const offsetX = imagePosition.x * (size / editorSize);
+          const offsetY = imagePosition.y * (size / editorSize);
 
-          const drawWidth = scaledWidth * (previewSize / editorSize) * scaleRatio;
-          const drawHeight = scaledHeight * (previewSize / editorSize) * scaleRatio;
-
-          // 중앙 정렬
-          const centerX = (size - drawWidth) / 2;
-          const centerY = (size - drawHeight) / 2;
+          // 이미지 크기도 동일한 비율로 축소
+          const drawWidth = scaledWidth * (size / editorSize);
+          const drawHeight = scaledHeight * (size / editorSize);
 
           ctx.drawImage(
             img,
-            centerX + offsetX,
-            centerY + offsetY,
+            offsetX,
+            offsetY,
             drawWidth,
             drawHeight
           );

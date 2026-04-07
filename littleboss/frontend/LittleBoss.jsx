@@ -1354,13 +1354,17 @@ function ProfilePage() {
           tempCtx.fillStyle = 'white';
           tempCtx.fillRect(0, 0, editSize, editSize);
 
-          // 2단계: 이미지를 중앙에서 offset만큼 이동해서 그리기
+          // 2단계: 편집 화면과 동일하게 이미지 배치
+          // 편집 화면: width: 100% * imageScale = 400 * imageScale (정사각형)
+          // 이미지 중심: (200, 200) + imagePosition
+          const displaySize = 400 * imageScale; // 편집 화면과 동일한 표시 크기
+
           tempCtx.drawImage(
             img,
-            centerX + imagePosition.x - scaledWidth / 2,
-            centerY + imagePosition.y - scaledHeight / 2,
-            scaledWidth,
-            scaledHeight
+            centerX + imagePosition.x - displaySize / 2,
+            centerY + imagePosition.y - displaySize / 2,
+            displaySize,
+            displaySize
           );
 
           // 3단계: 최종 Canvas 생성 (140x140 원형)

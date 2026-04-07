@@ -1286,6 +1286,12 @@ function ProfilePage() {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [tempImage, setTempImage] = useState(null);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [imageScale, setImageScale] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const fileInputRef = useRef(null);
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
 
@@ -1308,10 +1314,38 @@ function ProfilePage() {
     if (file && ["image/png", "image/jpeg"].includes(file.type)) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setProfileImage(event.target?.result);
+        setTempImage(event.target?.result);
+        setShowImageEditor(true);
+        setImagePosition({ x: 0, y: 0 });
+        setImageScale(1);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleImageConfirm = () => {
+    setProfileImage(tempImage);
+    setShowImageEditor(false);
+    setTempImage(null);
+  };
+
+  const handleImageCancel = () => {
+    setShowImageEditor(false);
+    setTempImage(null);
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setImagePosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   return (
@@ -1404,6 +1438,82 @@ function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* 사진 편집 모달 */}
+      {showImageEditor && tempImage && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001, onMouseMove: handleMouseMove, onMouseUp: handleMouseUp, onMouseLeave: handleMouseUp }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 500, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>사진 편집</div>
+
+            {/* 편집 영역 */}
+            <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
+              {/* 이미지 편집 */}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>이미지 조정</div>
+                <div style={{ width: "100%", height: 280, borderRadius: 10, overflow: "hidden", border: `2px dashed ${C.border}`, position: "relative", background: "#F9F9F9" }}>
+                  <img
+                    src={tempImage}
+                    draggable={false}
+                    onMouseDown={handleMouseDown}
+                    style={{
+                      width: `${100 * imageScale}%`,
+                      height: "auto",
+                      position: "absolute",
+                      transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`,
+                      cursor: isDragging ? "grabbing" : "grab",
+                      userSelect: "none"
+                    }}
+                  />
+                </div>
+                <div style={{ marginTop: 12 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>크기 조정</div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={imageScale}
+                    onChange={(e) => setImageScale(parseFloat(e.target.value))}
+                    style={{ width: "100%" }}
+                  />
+                  <div style={{ fontSize: 11, color: C.textLight, marginTop: 4, textAlign: "center" }}>{Math.round(imageScale * 100)}%</div>
+                </div>
+              </div>
+
+              {/* 미리보기 */}
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>미리보기</div>
+                <div style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: `3px solid ${C.purple}`,
+                  position: "relative",
+                  background: "#F9F9F9"
+                }}>
+                  <img
+                    src={tempImage}
+                    style={{
+                      width: `${100 * imageScale}%`,
+                      height: "auto",
+                      position: "absolute",
+                      transform: `translate(${imagePosition.x * 0.3}px, ${imagePosition.y * 0.3}px)`,
+                      pointerEvents: "none"
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 버튼 */}
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={handleImageCancel} style={{ ...S.btnOutline, fontSize: 13 }}>취소</button>
+              <button onClick={handleImageConfirm} style={{ ...S.btnPrimary, fontSize: 13 }}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 저장 확인 팝업 */}
       {showSaveConfirm && (

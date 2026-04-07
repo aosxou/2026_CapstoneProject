@@ -1378,16 +1378,18 @@ function ProfilePage() {
           finalCtx.fillStyle = 'white';
           finalCtx.fillRect(0, 0, previewSize, previewSize);
 
-          // 6단계: 임시 Canvas의 중앙 부분을 최종 Canvas로 복사
-          const startX = (editSize - previewSize) / 2;
-          const startY = (editSize - previewSize) / 2;
+          // 6단계: 임시 Canvas의 원형 가이드 부분을 최종 Canvas로 복사
+          // 편집 화면의 원형 프레임과 정확히 일치하도록
+          const frameSize = 200; // 편집 화면의 원형 프레임 크기
+          const frameStartX = (editSize - frameSize) / 2; // (400 - 200) / 2 = 100
+          const frameStartY = (editSize - frameSize) / 2; // 100
 
           finalCtx.drawImage(
             tempCanvas,
-            startX,
-            startY,
-            previewSize,
-            previewSize,
+            frameStartX,
+            frameStartY,
+            frameSize,
+            frameSize,
             0,
             0,
             previewSize,

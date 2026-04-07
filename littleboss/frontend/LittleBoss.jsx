@@ -1331,10 +1331,10 @@ function ProfilePage() {
       const editorSize = 380;
       const previewSize = 140;
 
-      // 1단계: 편집 영역 크기로 임시 Canvas 생성
+      // Canvas를 미리보기 크기(140x140)로 생성
       const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = editorSize;
-      tempCanvas.height = editorSize;
+      tempCanvas.width = previewSize;
+      tempCanvas.height = previewSize;
       const tempCtx = tempCanvas.getContext('2d');
       if (!tempCtx) throw new Error('Canvas context 실패');
 
@@ -1347,47 +1347,42 @@ function ProfilePage() {
           const scaledWidth = img.width * imageScale;
           const scaledHeight = img.height * imageScale;
 
-          // 편집 영역 기준으로 이미지 배치
+          // Canvas에 직접 그리기 (미리보기와 동일한 방식)
+          // 사각형 클리핑으로 범위 벗어나는 부분 자동 처리
+          tempCtx.save();
+          tempCtx.beginPath();
+          tempCtx.rect(0, 0, previewSize, previewSize);
+          tempCtx.clip();
+
+          // 배경 흰색
+          tempCtx.fillStyle = 'white';
+          tempCtx.fillRect(0, 0, previewSize, previewSize);
+
+          // 미리보기와 동일한 계산으로 이미지 배치
+          const offsetX = imagePosition.x * (previewSize / editorSize);
+          const offsetY = imagePosition.y * (previewSize / editorSize);
+          const drawWidth = scaledWidth * (previewSize / editorSize);
+          const drawHeight = scaledHeight * (previewSize / editorSize);
+
           tempCtx.drawImage(
             img,
-            imagePosition.x,
-            imagePosition.y,
-            scaledWidth,
-            scaledHeight
+            offsetX,
+            offsetY,
+            drawWidth,
+            drawHeight
           );
+          tempCtx.restore();
 
-          // 3단계: 최종 Canvas 생성 (140x140)
-          const finalCanvas = document.createElement('canvas');
-          finalCanvas.width = previewSize;
-          finalCanvas.height = previewSize;
-          const finalCtx = finalCanvas.getContext('2d');
+          // 원형 마스크 생성
+          tempCtx.save();
+          tempCtx.globalCompositeOperation = 'destination-in';
+          tempCtx.beginPath();
+          tempCtx.arc(previewSize / 2, previewSize / 2, previewSize / 2, 0, Math.PI * 2);
+          tempCtx.fillStyle = 'white';
+          tempCtx.fill();
+          tempCtx.restore();
 
-          // 4단계: 원형 마스크 생성
-          finalCtx.beginPath();
-          finalCtx.arc(previewSize / 2, previewSize / 2, previewSize / 2, 0, Math.PI * 2);
-          finalCtx.clip();
-
-          // 5단계: 배경 흰색
-          finalCtx.fillStyle = 'white';
-          finalCtx.fillRect(0, 0, previewSize, previewSize);
-
-          // 6단계: 임시 Canvas의 중앙 부분 복사 (미리보기에서 보이는 부분)
-          const startX = (editorSize - previewSize) / 2;
-          const startY = (editorSize - previewSize) / 2;
-
-          finalCtx.drawImage(
-            tempCanvas,
-            startX,
-            startY,
-            previewSize,
-            previewSize,
-            0,
-            0,
-            previewSize,
-            previewSize
-          );
-
-          const result = finalCanvas.toDataURL('image/png');
+          const result = tempCanvas.toDataURL('image/png');
           setProfileImage(result);
           setShowImageEditor(false);
           setTempImage(null);

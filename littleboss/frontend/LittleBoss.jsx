@@ -1286,6 +1286,7 @@ function ProfilePage() {
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [profileImageData, setProfileImageData] = useState(null); // { src, x, y, scale }
   const [tempImage, setTempImage] = useState(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
@@ -1324,43 +1325,16 @@ function ProfilePage() {
   };
 
   const handleImageConfirm = () => {
-    // Canvas를 사용해서 원형으로 자른 이미지 생성
-    const canvas = document.createElement('canvas');
-    const editorSize = 380; // 편집 영역 크기
-    const finalSize = 200; // 최종 사진 크기
-
-    canvas.width = finalSize;
-    canvas.height = finalSize;
-    const ctx = canvas.getContext('2d');
-
-    // 원형 클리핑
-    ctx.beginPath();
-    ctx.arc(finalSize / 2, finalSize / 2, finalSize / 2, 0, Math.PI * 2);
-    ctx.clip();
-
-    // 이미지 그리기
-    const img = new Image();
-    img.onload = () => {
-      // 편집 영역 중앙 원형 부분만 추출
-      const ratio = finalSize / editorSize;
-      const scaledWidth = img.width * imageScale;
-      const scaledHeight = img.height * imageScale;
-
-      // 편집 영역 중심(editorSize/2)에서의 이미지 위치
-      const editorCenterX = editorSize / 2;
-      const editorCenterY = editorSize / 2;
-
-      // Canvas에 그리기 (비율 적용)
-      const drawX = (editorCenterX - scaledWidth / 2 + imagePosition.x) * ratio;
-      const drawY = (editorCenterY - scaledHeight / 2 + imagePosition.y) * ratio;
-
-      ctx.drawImage(img, drawX, drawY, scaledWidth * ratio, scaledHeight * ratio);
-      const croppedImage = canvas.toDataURL('image/png');
-      setProfileImage(croppedImage);
-      setShowImageEditor(false);
-      setTempImage(null);
-    };
-    img.src = tempImage;
+    // 이미지 위치와 스케일 정보 저장
+    setProfileImageData({
+      src: tempImage,
+      x: imagePosition.x,
+      y: imagePosition.y,
+      scale: imageScale
+    });
+    setProfileImage(tempImage);
+    setShowImageEditor(false);
+    setTempImage(null);
   };
 
   const handleImageCancel = () => {
@@ -1411,7 +1385,21 @@ function ProfilePage() {
           {settingsTab === "profile" && (
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: profileImage ? `url(${profileImage})` : `linear-gradient(135deg,${C.purple},${C.purpleLight})`, backgroundSize: "cover", backgroundPosition: "center", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 26, fontWeight: 700, overflow: "hidden" }}>
+                <div style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  background: profileImage ? `url(${profileImage})` : `linear-gradient(135deg,${C.purple},${C.purpleLight})`,
+                  backgroundSize: profileImageData ? `${72 * profileImageData.scale}px` : "cover",
+                  backgroundPosition: profileImageData ? `${-profileImageData.x * (72 / 380)}px ${-profileImageData.y * (72 / 380)}px` : "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  fontSize: 26,
+                  fontWeight: 700,
+                  overflow: "hidden"
+                }}>
                   {!profileImage && "이"}
                 </div>
                 <div>

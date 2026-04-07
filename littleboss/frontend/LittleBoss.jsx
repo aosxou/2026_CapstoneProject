@@ -1354,17 +1354,17 @@ function ProfilePage() {
           tempCtx.fillStyle = 'white';
           tempCtx.fillRect(0, 0, editSize, editSize);
 
-          // 2단계: 편집 화면과 동일하게 이미지 배치
-          // 편집 화면: width: 100% * imageScale = 400 * imageScale (정사각형)
-          // 이미지 중심: (200, 200) + imagePosition
-          const displaySize = 400 * imageScale; // 편집 화면과 동일한 표시 크기
+          // 2단계: 편집 화면과 동일하게 이미지 배치 (원본 비율 유지)
+          // 편집 화면: width: 100% * imageScale = 400 * imageScale, height: auto
+          const displayWidth = 400 * imageScale;
+          const displayHeight = displayWidth * (img.height / img.width); // 원본 비율 유지
 
           tempCtx.drawImage(
             img,
-            centerX + imagePosition.x - displaySize / 2,
-            centerY + imagePosition.y - displaySize / 2,
-            displaySize,
-            displaySize
+            centerX + imagePosition.x - displayWidth / 2,
+            centerY + imagePosition.y - displayHeight / 2,
+            displayWidth,
+            displayHeight
           );
 
           // 3단계: 최종 Canvas 생성 (140x140 원형)

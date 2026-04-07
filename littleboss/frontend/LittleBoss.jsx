@@ -1326,8 +1326,7 @@ function ProfilePage() {
   const handleImageConfirm = () => {
     // Canvas를 사용해서 원형으로 자른 이미지 생성
     const canvas = document.createElement('canvas');
-    const editorSize = 280; // 편집 영역 크기
-    const previewSize = 120; // 미리보기 크기
+    const editorSize = 380; // 편집 영역 크기
     const finalSize = 200; // 최종 사진 크기
 
     canvas.width = finalSize;
@@ -1342,14 +1341,20 @@ function ProfilePage() {
     // 이미지 그리기
     const img = new Image();
     img.onload = () => {
-      // 편집 영역 기준으로 계산된 값을 최종 크기로 스케일링
-      const scale = finalSize / editorSize;
-      const scaledWidth = img.width * imageScale * scale;
-      const scaledHeight = img.height * imageScale * scale;
-      const x = imagePosition.x * scale + (finalSize - scaledWidth) / 2;
-      const y = imagePosition.y * scale + (finalSize - scaledHeight) / 2;
+      // 편집 영역 중앙 원형 부분만 추출
+      const ratio = finalSize / editorSize;
+      const scaledWidth = img.width * imageScale;
+      const scaledHeight = img.height * imageScale;
 
-      ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+      // 편집 영역 중심(editorSize/2)에서의 이미지 위치
+      const editorCenterX = editorSize / 2;
+      const editorCenterY = editorSize / 2;
+
+      // Canvas에 그리기 (비율 적용)
+      const drawX = (editorCenterX - scaledWidth / 2 + imagePosition.x) * ratio;
+      const drawY = (editorCenterY - scaledHeight / 2 + imagePosition.y) * ratio;
+
+      ctx.drawImage(img, drawX, drawY, scaledWidth * ratio, scaledHeight * ratio);
       const croppedImage = canvas.toDataURL('image/png');
       setProfileImage(croppedImage);
       setShowImageEditor(false);
@@ -1370,7 +1375,20 @@ function ProfilePage() {
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    setImagePosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+    let newX = e.clientX - dragStart.x;
+    let newY = e.clientY - dragStart.y;
+
+    // 이미지가 편집 영역을 벗어나지 않도록 제한 (미리보기가 항상 유효한 이미지 부분 보도록)
+    const editorSize = 280;
+    const maxOffsetX = 0;
+    const minOffsetX = -editorSize * (imageScale - 1);
+    const maxOffsetY = 0;
+    const minOffsetY = -editorSize * (imageScale - 1);
+
+    newX = Math.max(minOffsetX, Math.min(maxOffsetX, newX));
+    newY = Math.max(minOffsetY, Math.min(maxOffsetY, newY));
+
+    setImagePosition({ x: newX, y: newY });
   };
 
   const handleMouseUp = () => {
@@ -1470,16 +1488,16 @@ function ProfilePage() {
 
       {/* 사진 편집 모달 */}
       {showImageEditor && tempImage && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001, onMouseMove: handleMouseMove, onMouseUp: handleMouseUp, onMouseLeave: handleMouseUp }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-          <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 500, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001, onMouseMove: handleMouseMove, onMouseUp: handleMouseUp, onMouseLeave: handleMouseUp }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 1000, width: "90%", boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>사진 편집</div>
 
             {/* 편집 영역 */}
-            <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
+            <div style={{ display: "flex", gap: 40, marginBottom: 20, alignItems: "flex-start" }}>
               {/* 이미지 편집 */}
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>이미지 조정</div>
-                <div style={{ width: "100%", height: 280, borderRadius: 10, overflow: "hidden", border: `2px dashed ${C.border}`, position: "relative", background: "#F9F9F9" }}>
+                <div style={{ width: "100%", height: 380, borderRadius: 10, overflow: "hidden", border: `2px dashed ${C.border}`, position: "relative", background: "#F9F9F9" }}>
                   <img
                     src={tempImage}
                     draggable={false}
@@ -1510,16 +1528,17 @@ function ProfilePage() {
               </div>
 
               {/* 미리보기 */}
-              <div style={{ textAlign: "center" }}>
+              <div style={{ textAlign: "center", minWidth: 160 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>미리보기</div>
                 <div style={{
-                  width: 120,
-                  height: 120,
+                  width: 140,
+                  height: 140,
                   borderRadius: "50%",
                   overflow: "hidden",
                   border: `3px solid ${C.purple}`,
                   position: "relative",
-                  background: "#F9F9F9"
+                  background: "#F9F9F9",
+                  margin: "0 auto"
                 }}>
                   <img
                     src={tempImage}
@@ -1527,8 +1546,8 @@ function ProfilePage() {
                       width: `${100 * imageScale}%`,
                       height: "auto",
                       position: "absolute",
-                      left: `${imagePosition.x * (120 / 280)}px`,
-                      top: `${imagePosition.y * (120 / 280)}px`,
+                      left: `${imagePosition.x * (140 / 380)}px`,
+                      top: `${imagePosition.y * (140 / 380)}px`,
                       pointerEvents: "none"
                     }}
                   />

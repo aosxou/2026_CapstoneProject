@@ -1288,7 +1288,7 @@ function ProfilePage() {
   const [profileImage, setProfileImage] = useState(null);
   const [tempImage, setTempImage] = useState(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
-  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [imagePosition, setImagePosition] = useState({ x: -95, y: -95 });
   const [imageScale, setImageScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
@@ -1426,16 +1426,13 @@ function ProfilePage() {
     let newX = e.clientX - dragStartRef.current.x;
     let newY = e.clientY - dragStartRef.current.y;
 
-    // 이미지가 편집 영역 내에서만 움직이도록 (상하좌우 자유로운 이동)
+    // 이미지 자유로운 이동 (큰 범위 내에서만 제한)
+    // 사용자가 충분히 조정할 수 있도록 여유 있는 범위 설정
     const editorSize = 380;
-    const scaledWidth = editorSize * imageScale;
-    const scaledHeight = editorSize * imageScale;
-
-    // 범위를 올바르게 설정 (이미지가 항상 편집 영역과 겹치도록)
-    const minOffsetX = Math.min(0, editorSize - scaledWidth);
-    const maxOffsetX = Math.max(0, editorSize - scaledWidth);
-    const minOffsetY = Math.min(0, editorSize - scaledHeight);
-    const maxOffsetY = Math.max(0, editorSize - scaledHeight);
+    const minOffsetX = -500;
+    const maxOffsetX = 500;
+    const minOffsetY = -500;
+    const maxOffsetY = 500;
 
     newX = Math.max(minOffsetX, Math.min(maxOffsetX, newX));
     newY = Math.max(minOffsetY, Math.min(maxOffsetY, newY));

@@ -673,8 +673,8 @@ function SchedulePage({ onNavTo }) {
             const sp = special[d];
             const isOther = (i < 6 && d > 20) || (i > 28 && d < 5);
             const eventTitles = { 17: "국가장학금", 22: "졸업예비심사", 27: "근로장학금" };
-            const bgColorMap = { incomplete: C.purpleBg, ongoing: "#FFF7ED", completed: C.greenBg };
-            const colorMap = { incomplete: C.purple, ongoing: "#EA580C", completed: C.green };
+            const bgColorMap = { incomplete: "#F5F5F5", ongoing: "#FFF7ED", completed: C.greenBg };
+            const colorMap = { incomplete: "#999", ongoing: "#EA580C", completed: C.green };
             return (
               <div key={i} onClick={() => sp && sp !== "today" && onNavTo('schedule-detail', d)} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", fontSize: 13, borderRadius: 8, cursor: sp && sp !== "today" ? "pointer" : "default", padding: 8,
                 color: isOther ? "#CCC" : sp === "today" ? "#0066CC" : colorMap[sp] || C.textMid,
@@ -702,7 +702,7 @@ function SchedulePage({ onNavTo }) {
             <span style={{ color: C.textLight }}>완료</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-            <div style={{ width: 12, height: 12, borderRadius: 2, background: C.purple }}></div>
+            <div style={{ width: 12, height: 12, borderRadius: 2, background: "#999" }}></div>
             <span style={{ color: C.textLight }}>미완료</span>
           </div>
         </div>

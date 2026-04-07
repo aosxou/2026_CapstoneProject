@@ -1358,11 +1358,12 @@ function ProfilePage() {
           tempCtx.fillStyle = 'white';
           tempCtx.fillRect(0, 0, previewSize, previewSize);
 
-          // 미리보기와 동일한 계산으로 이미지 배치
+          // 미리보기와 정확히 동일한 계산
+          // 미리보기: width: ${100 * imageScale}% = previewSize * imageScale
           const offsetX = imagePosition.x * (previewSize / editorSize);
           const offsetY = imagePosition.y * (previewSize / editorSize);
-          const drawWidth = scaledWidth * (previewSize / editorSize);
-          const drawHeight = scaledHeight * (previewSize / editorSize);
+          const drawWidth = previewSize * imageScale;
+          const drawHeight = (img.height / img.width) * previewSize * imageScale;
 
           tempCtx.drawImage(
             img,

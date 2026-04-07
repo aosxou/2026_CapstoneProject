@@ -1633,8 +1633,8 @@ function ProfilePage() {
                       width: `${100 * imageScale}%`,
                       height: "auto",
                       position: "absolute",
-                      left: `${imagePosition.x * (140 / 380)}px`,
-                      top: `${imagePosition.y * (140 / 380)}px`,
+                      left: `${(imagePosition.x - 120) * (140 / 380)}px`,
+                      top: `${(imagePosition.y - 120) * (140 / 380)}px`,
                       pointerEvents: "none"
                     }}
                   />

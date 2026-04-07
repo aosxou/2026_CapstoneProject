@@ -677,8 +677,8 @@ function SchedulePage({ onNavTo }) {
             const colorMap = { incomplete: C.purple, ongoing: "#EA580C", completed: C.green };
             return (
               <div key={i} onClick={() => sp && sp !== "today" && onNavTo('schedule-detail', d)} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", fontSize: 13, borderRadius: 8, cursor: sp && sp !== "today" ? "pointer" : "default", padding: 8,
-                color: isOther ? "#CCC" : sp === "today" ? "white" : colorMap[sp] || C.textMid,
-                background: sp === "today" ? C.purple : bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: (sp && sp !== "today") ? 1 : 0.8, transform: "none" }}
+                color: isOther ? "#CCC" : sp === "today" ? "#0066CC" : colorMap[sp] || C.textMid,
+                background: sp === "today" ? "#B3D9FF" : bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: (sp && sp !== "today") ? 1 : 0.8, transform: "none" }}
                 onMouseEnter={(e) => { if (sp && sp !== "today") { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
                 <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
@@ -768,13 +768,16 @@ function OngoingPage({ onNavTo }) {
           const percentage = (doneCount / doc.total) * 100;
 
           return (
-            <div key={doc.title} onClick={() => onNavTo("schedule-detail", doc.scheduleDay)} style={{ ...S.card, cursor: "pointer" }}>
+            <div key={doc.title} onClick={() => onNavTo("schedule-detail", doc.title)} style={{ ...S.card, cursor: "pointer" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.text }}>{doc.title}</div>
                   <div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
+                  <span style={{ fontSize: 20, color: C.textLight, fontWeight: 300 }}>›</span>
+                </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12 }}>
                 {doc.checks.map((c, idx) => (
@@ -902,15 +905,15 @@ function ExpiredPage({ onNavTo }) {
   );
 }
 
-function ScheduleDetailPage({ day, prevSub, onNavTo }) {
+function ScheduleDetailPage({ day, title, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
   const { toast } = useToast();
 
   // 로드
   useEffect(() => {
-    if (day) {
-      const key = `scheduleDetail_${day}`;
+    if (day || title) {
+      const key = `scheduleDetail_${title || day}`;
       const saved = localStorage.getItem(key);
       console.log("로드:", key, saved);
       if (saved) {
@@ -923,24 +926,30 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
         }
       }
     }
-  }, [day]);
+  }, [day, title]);
 
   // 자동 저장
   useEffect(() => {
-    if (day) {
-      const key = `scheduleDetail_${day}`;
+    if (day || title) {
+      const key = `scheduleDetail_${title || day}`;
       const data = JSON.stringify({ memo, checks });
       localStorage.setItem(key, data);
       console.log("저장:", key, data);
     }
-  }, [memo, checks, day]);
+  }, [memo, checks, day, title]);
+
+  const scheduleDataByTitle = {
+    "국가장학금 신청": { title: "국가장학금 신청", deadline: "2026-03-22 17:00", dday: "D-3", summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.", documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"], color: "#A91E2E", bg: "#FFE5E5" },
+    "졸업예비심사 신청": { title: "졸업예비심사 신청", deadline: "2026-03-22 18:00", dday: "D-8", summary: "졸업 자격 심사를 위한 졸업예비심사 신청입니다. 졸업논문 계획서와 지도교수 확인서가 필수입니다.", documents: ["졸업논문 계획서", "지도교수 확인서", "학교 포털 심사 신청"], color: "#EA580C", bg: "#FFF7ED" },
+    "근로장학금 신청": { title: "근로장학금 신청", deadline: "2026-03-27 23:59", dday: "D-8", summary: "학교 근로 장학금 신청입니다. 근로시간 증명서와 통장 사본이 필요합니다.", documents: ["재학증명서", "통장 사본", "신원증 사본"], color: C.green, bg: "#F0FDF4" }
+  };
 
   const scheduleData = {
     22: { title: "국가장학금 신청", deadline: "2026-03-22 17:00", dday: "D-3", summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.", documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"], color: "#A91E2E", bg: "#FFE5E5" },
     27: { title: "근로장학금 신청", deadline: "2026-03-27 23:59", dday: "D-8", summary: "학교 근로 장학금 신청입니다. 근로시간 증명서와 통장 사본이 필요합니다.", documents: ["재학증명서", "통장 사본", "신원증 사본"], color: C.green, bg: "#F0FDF4" }
   };
 
-  const data = scheduleData[day];
+  const data = title ? scheduleDataByTitle[title] : scheduleData[day];
   if (!data) return <div>일정을 찾을 수 없습니다</div>;
 
   const toggleCheck = (idx) => {
@@ -1487,6 +1496,7 @@ export default function App() {
   const [sub, setSub] = useState(params.get("sub") || "sub-home");
   const [prevSub, setPrevSub] = useState("sub-home");
   const [scheduleDetailDay, setScheduleDetailDay] = useState(null);
+  const [scheduleDetailTitle, setScheduleDetailTitle] = useState(null);
   const [docDetailData, setDocDetailData] = useState(null);
   const [docAnalysisId, setDocAnalysisId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -1496,23 +1506,24 @@ export default function App() {
 
   const handleLogin = (m) => { setPage("app"); setSub("sub-home"); toast(m); };
   const handleLogout = () => { setPage("login"); toast("로그아웃됐어요"); };
-  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) setScheduleDetailDay(detailDay); if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
+  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) { if(typeof detailDay === 'number') setScheduleDetailDay(detailDay); else setScheduleDetailTitle(detailDay); } if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
 
   // 히스토리 관리
   useEffect(() => {
-    window.history.pushState({ sub, scheduleDetailDay, docDetailData }, null, '');
+    window.history.pushState({ sub, scheduleDetailDay, scheduleDetailTitle, docDetailData }, null, '');
 
     const handlePopState = (e) => {
       if (e.state) {
         setSub(e.state.sub || "sub-home");
         if (e.state.scheduleDetailDay) setScheduleDetailDay(e.state.scheduleDetailDay);
+        if (e.state.scheduleDetailTitle) setScheduleDetailTitle(e.state.scheduleDetailTitle);
         if (e.state.docDetailData) setDocDetailData(e.state.docDetailData);
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [sub, scheduleDetailDay, docDetailData]);
+  }, [sub, scheduleDetailDay, scheduleDetailTitle, docDetailData]);
 
   if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
   if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} /><ToastEl msg={msg} show={show} /></>;
@@ -1528,7 +1539,7 @@ export default function App() {
           {sub === "sub-home" && <Dashboard onNavTo={navTo} />}
           {sub === "sub-upload" && <UploadPage onNavTo={navTo} />}
           {sub === "sub-schedule" && <SchedulePage onNavTo={navTo} />}
-          {sub === "schedule-detail" && <ScheduleDetailPage day={scheduleDetailDay} prevSub={prevSub} onNavTo={navTo} />}
+          {sub === "schedule-detail" && <ScheduleDetailPage day={scheduleDetailDay} title={scheduleDetailTitle} prevSub={prevSub} onNavTo={navTo} />}
           {sub === "sub-ongoing" && <OngoingPage onNavTo={navTo} />}
           {sub === "sub-expired" && <ExpiredPage onNavTo={navTo} />}
           {sub === "doc-detail" && <DocumentDetailPage data={docDetailData} prevSub={prevSub} onNavTo={navTo} />}

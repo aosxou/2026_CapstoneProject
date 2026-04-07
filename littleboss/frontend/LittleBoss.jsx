@@ -1326,28 +1326,30 @@ function ProfilePage() {
   const handleImageConfirm = () => {
     // Canvas를 사용해서 원형으로 자른 이미지 생성
     const canvas = document.createElement('canvas');
-    const size = 200; // 원형 사진 크기
-    canvas.width = size;
-    canvas.height = size;
+    const editorSize = 280; // 편집 영역 크기
+    const previewSize = 120; // 미리보기 크기
+    const finalSize = 200; // 최종 사진 크기
+
+    canvas.width = finalSize;
+    canvas.height = finalSize;
     const ctx = canvas.getContext('2d');
 
     // 원형 클리핑
     ctx.beginPath();
-    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.arc(finalSize / 2, finalSize / 2, finalSize / 2, 0, Math.PI * 2);
     ctx.clip();
 
     // 이미지 그리기
     const img = new Image();
     img.onload = () => {
-      const scaledWidth = img.width * imageScale;
-      const scaledHeight = img.height * imageScale;
-      ctx.drawImage(
-        img,
-        imagePosition.x + (size - scaledWidth) / 2,
-        imagePosition.y + (size - scaledHeight) / 2,
-        scaledWidth,
-        scaledHeight
-      );
+      // 편집 영역 기준으로 계산된 값을 최종 크기로 스케일링
+      const scale = finalSize / editorSize;
+      const scaledWidth = img.width * imageScale * scale;
+      const scaledHeight = img.height * imageScale * scale;
+      const x = imagePosition.x * scale + (finalSize - scaledWidth) / 2;
+      const y = imagePosition.y * scale + (finalSize - scaledHeight) / 2;
+
+      ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
       const croppedImage = canvas.toDataURL('image/png');
       setProfileImage(croppedImage);
       setShowImageEditor(false);
@@ -1517,20 +1519,17 @@ function ProfilePage() {
                   overflow: "hidden",
                   border: `3px solid ${C.purple}`,
                   position: "relative",
-                  background: "#F9F9F9",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center"
+                  background: "#F9F9F9"
                 }}>
                   <img
                     src={tempImage}
                     style={{
-                      minWidth: `${100 * imageScale}%`,
-                      minHeight: `${100 * imageScale}%`,
+                      width: `${100 * imageScale}%`,
+                      height: "auto",
                       position: "absolute",
-                      transform: `translate(${imagePosition.x * (120 / 280)}px, ${imagePosition.y * (120 / 280)}px)`,
-                      pointerEvents: "none",
-                      objectFit: "cover"
+                      left: `${imagePosition.x * (120 / 280)}px`,
+                      top: `${imagePosition.y * (120 / 280)}px`,
+                      pointerEvents: "none"
                     }}
                   />
                 </div>

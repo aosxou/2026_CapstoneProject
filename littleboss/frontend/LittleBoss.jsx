@@ -1324,9 +1324,36 @@ function ProfilePage() {
   };
 
   const handleImageConfirm = () => {
-    setProfileImage(tempImage);
-    setShowImageEditor(false);
-    setTempImage(null);
+    // Canvas를 사용해서 원형으로 자른 이미지 생성
+    const canvas = document.createElement('canvas');
+    const size = 200; // 원형 사진 크기
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // 원형 클리핑
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.clip();
+
+    // 이미지 그리기
+    const img = new Image();
+    img.onload = () => {
+      const scaledWidth = img.width * imageScale;
+      const scaledHeight = img.height * imageScale;
+      ctx.drawImage(
+        img,
+        imagePosition.x + (size - scaledWidth) / 2,
+        imagePosition.y + (size - scaledHeight) / 2,
+        scaledWidth,
+        scaledHeight
+      );
+      const croppedImage = canvas.toDataURL('image/png');
+      setProfileImage(croppedImage);
+      setShowImageEditor(false);
+      setTempImage(null);
+    };
+    img.src = tempImage;
   };
 
   const handleImageCancel = () => {
@@ -1490,16 +1517,20 @@ function ProfilePage() {
                   overflow: "hidden",
                   border: `3px solid ${C.purple}`,
                   position: "relative",
-                  background: "#F9F9F9"
+                  background: "#F9F9F9",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center"
                 }}>
                   <img
                     src={tempImage}
                     style={{
-                      width: `${100 * imageScale}%`,
-                      height: "auto",
+                      minWidth: `${100 * imageScale}%`,
+                      minHeight: `${100 * imageScale}%`,
                       position: "absolute",
-                      transform: `translate(${imagePosition.x * 0.3}px, ${imagePosition.y * 0.3}px)`,
-                      pointerEvents: "none"
+                      transform: `translate(${imagePosition.x * (120 / 280)}px, ${imagePosition.y * (120 / 280)}px)`,
+                      pointerEvents: "none",
+                      objectFit: "cover"
                     }}
                   />
                 </div>

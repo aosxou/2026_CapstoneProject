@@ -1291,7 +1291,7 @@ function ProfilePage() {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const fileInputRef = useRef(null);
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
 
@@ -1416,13 +1416,13 @@ function ProfilePage() {
 
   const handleMouseDown = (e) => {
     setIsDragging(true);
-    setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y });
+    dragStartRef.current = { x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y };
   };
 
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    let newX = e.clientX - dragStart.x;
-    let newY = e.clientY - dragStart.y;
+    let newX = e.clientX - dragStartRef.current.x;
+    let newY = e.clientY - dragStartRef.current.y;
 
     // 이미지가 편집 영역을 벗어나지 않도록 제한 (미리보기가 항상 유효한 이미지 부분 보도록)
     const editorSize = 380;

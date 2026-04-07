@@ -1288,7 +1288,7 @@ function ProfilePage() {
   const [profileImage, setProfileImage] = useState(null);
   const [tempImage, setTempImage] = useState(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
-  const [imagePosition, setImagePosition] = useState({ x: -95, y: -95 });
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [imageScale, setImageScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
@@ -1339,23 +1339,26 @@ function ProfilePage() {
         try {
           const scaledWidth = img.width * imageScale;
           const scaledHeight = img.height * imageScale;
+          const editSize = 400; // 모달의 편집 영역 크기
+          const centerX = editSize / 2;
+          const centerY = editSize / 2;
 
-          // 1단계: 임시 Canvas를 편집 영역 크기로 생성 (확대해도 짤리지 않게)
+          // 1단계: 임시 Canvas를 편집 영역 크기로 생성
           const tempCanvas = document.createElement('canvas');
-          tempCanvas.width = editorSize;
-          tempCanvas.height = editorSize;
+          tempCanvas.width = editSize;
+          tempCanvas.height = editSize;
           const tempCtx = tempCanvas.getContext('2d');
           if (!tempCtx) throw new Error('Canvas context 실패');
 
           // 배경 흰색
           tempCtx.fillStyle = 'white';
-          tempCtx.fillRect(0, 0, editorSize, editorSize);
+          tempCtx.fillRect(0, 0, editSize, editSize);
 
-          // 2단계: 이미지를 편집 영역 기준으로 그리기 (확대된 크기로)
+          // 2단계: 이미지를 중앙에서 offset만큼 이동해서 그리기
           tempCtx.drawImage(
             img,
-            imagePosition.x,
-            imagePosition.y,
+            centerX + imagePosition.x - scaledWidth / 2,
+            centerY + imagePosition.y - scaledHeight / 2,
             scaledWidth,
             scaledHeight
           );
@@ -1376,8 +1379,8 @@ function ProfilePage() {
           finalCtx.fillRect(0, 0, previewSize, previewSize);
 
           // 6단계: 임시 Canvas의 중앙 부분을 최종 Canvas로 복사
-          const startX = (editorSize - previewSize) / 2;
-          const startY = (editorSize - previewSize) / 2;
+          const startX = (editSize - previewSize) / 2;
+          const startY = (editSize - previewSize) / 2;
 
           finalCtx.drawImage(
             tempCanvas,
@@ -1434,13 +1437,12 @@ function ProfilePage() {
     let newX = e.clientX - dragStartRef.current.x;
     let newY = e.clientY - dragStartRef.current.y;
 
-    // 이미지 자유로운 이동 (큰 범위 내에서만 제한)
+    // 이미지 자유로운 이동 (중앙 기준)
     // 사용자가 충분히 조정할 수 있도록 여유 있는 범위 설정
-    const editorSize = 380;
-    const minOffsetX = -500;
-    const maxOffsetX = 500;
-    const minOffsetY = -500;
-    const maxOffsetY = 500;
+    const minOffsetX = -300;
+    const maxOffsetX = 300;
+    const minOffsetY = -300;
+    const maxOffsetY = 300;
 
     newX = Math.max(minOffsetX, Math.min(maxOffsetX, newX));
     newY = Math.max(minOffsetY, Math.min(maxOffsetY, newY));
@@ -1568,98 +1570,81 @@ function ProfilePage() {
         </div>
       </div>
 
-      {/* 사진 편집 모달 */}
+      {/* 사진 편집 모달 - 인스타그램 스타일 */}
       {showImageEditor && tempImage && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001 }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-          <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 1000, width: "90%", boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>사진 편집</div>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 1001 }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+          {/* 헤더 */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: "rgba(0,0,0,0.7)", color: "white" }}>
+            <button onClick={handleImageCancel} style={{ background: "none", border: "none", color: "white", fontSize: 16, cursor: "pointer", fontFamily: "inherit" }}>취소</button>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>프로필 사진 편집</div>
+            <button onClick={handleImageConfirm} style={{ background: "none", border: "none", color: C.purple, fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>완료</button>
+          </div>
 
-            {/* 편집 영역 */}
-            <div style={{ display: "flex", gap: 40, marginBottom: 20, alignItems: "flex-start" }}>
-              {/* 이미지 편집 */}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>이미지 조정</div>
-                <div
-                  style={{ width: "100%", height: 380, borderRadius: 10, overflow: "hidden", border: `2px dashed ${C.border}`, position: "relative", background: "#F9F9F9", cursor: isDragging ? "grabbing" : "grab" }}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                >
-                  <img
-                    src={tempImage}
-                    draggable={false}
-                    onMouseDown={handleMouseDown}
-                    style={{
-                      width: `${100 * imageScale}%`,
-                      height: "auto",
-                      position: "absolute",
-                      transform: `translate(${imagePosition.x}px, ${imagePosition.y}px)`,
-                      cursor: isDragging ? "grabbing" : "grab",
-                      userSelect: "none"
-                    }}
-                  />
-                  {/* 미리보기 범위 표시 */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 120,
-                      top: 120,
-                      width: 140,
-                      height: 140,
-                      borderRadius: "50%",
-                      border: `3px solid ${C.purple}`,
-                      pointerEvents: "none",
-                      boxShadow: "inset 0 0 0 1000px rgba(0,0,0,0.1)"
-                    }}
-                  />
-                </div>
-                <div style={{ marginTop: 12 }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>크기 조정</div>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="2"
-                    step="0.1"
-                    value={imageScale}
-                    onChange={(e) => setImageScale(parseFloat(e.target.value))}
-                    style={{ width: "100%" }}
-                  />
-                  <div style={{ fontSize: 11, color: C.textLight, marginTop: 4, textAlign: "center" }}>{Math.round(imageScale * 100)}%</div>
-                </div>
-              </div>
+          {/* 편집 영역 */}
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", marginTop: 60, marginBottom: 120 }}>
+            <div
+              style={{
+                position: "relative",
+                width: 400,
+                height: 400,
+                overflow: "hidden",
+                background: "#1a1a1a",
+                cursor: isDragging ? "grabbing" : "grab"
+              }}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {/* 이미지 */}
+              <img
+                src={tempImage}
+                draggable={false}
+                onMouseDown={handleMouseDown}
+                style={{
+                  width: `${100 * imageScale}%`,
+                  height: "auto",
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: `translate(calc(-50% + ${imagePosition.x}px), calc(-50% + ${imagePosition.y}px))`,
+                  cursor: isDragging ? "grabbing" : "grab",
+                  userSelect: "none"
+                }}
+              />
 
-              {/* 미리보기 */}
-              <div style={{ textAlign: "center", minWidth: 160 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>미리보기</div>
-                <div style={{
-                  width: 140,
-                  height: 140,
+              {/* 원형 가이드 (중앙) */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 200,
+                  height: 200,
                   borderRadius: "50%",
-                  overflow: "hidden",
                   border: `3px solid ${C.purple}`,
-                  position: "relative",
-                  background: "#F9F9F9",
-                  margin: "0 auto"
-                }}>
-                  <img
-                    src={tempImage}
-                    style={{
-                      width: `${100 * imageScale}%`,
-                      height: "auto",
-                      position: "absolute",
-                      left: `${(imagePosition.x - 120) * (140 / 380)}px`,
-                      top: `${(imagePosition.y - 120) * (140 / 380)}px`,
-                      pointerEvents: "none"
-                    }}
-                  />
-                </div>
-              </div>
+                  pointerEvents: "none",
+                  boxShadow: "0 0 0 9999px rgba(0,0,0,0.4)"
+                }}
+              />
             </div>
+          </div>
 
-            {/* 버튼 */}
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={handleImageCancel} style={{ ...S.btnOutline, fontSize: 13 }}>취소</button>
-              <button onClick={handleImageConfirm} style={{ ...S.btnPrimary, fontSize: 13 }}>확인</button>
+          {/* 슬라이더 */}
+          <div style={{ position: "absolute", bottom: 100, width: "80%", maxWidth: 400, padding: "0 20px", color: "white" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 12 }}>-</span>
+              <input
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={imageScale}
+                onChange={(e) => setImageScale(parseFloat(e.target.value))}
+                style={{ flex: 1, cursor: "pointer" }}
+              />
+              <span style={{ fontSize: 12 }}>+</span>
+              <span style={{ fontSize: 12, minWidth: 30, textAlign: "right" }}>{Math.round(imageScale * 100)}%</span>
             </div>
           </div>
         </div>

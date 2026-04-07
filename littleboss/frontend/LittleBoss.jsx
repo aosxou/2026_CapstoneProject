@@ -1598,6 +1598,20 @@ function ProfilePage() {
                       userSelect: "none"
                     }}
                   />
+                  {/* 미리보기 범위 표시 */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 120,
+                      top: 120,
+                      width: 140,
+                      height: 140,
+                      borderRadius: "50%",
+                      border: `3px solid ${C.purple}`,
+                      pointerEvents: "none",
+                      boxShadow: "inset 0 0 0 1000px rgba(0,0,0,0.1)"
+                    }}
+                  />
                 </div>
                 <div style={{ marginTop: 12 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: C.textLight, marginBottom: 8 }}>크기 조정</div>

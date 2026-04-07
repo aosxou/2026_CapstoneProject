@@ -1326,53 +1326,68 @@ function ProfilePage() {
   };
 
   const handleImageConfirm = () => {
-    // Canvas로 원형 이미지 생성 (미리보기와 동일한 크기/계산)
+    // Canvas로 원형 이미지 생성 (미리보기와 동일한 계산)
     try {
-      const canvas = document.createElement('canvas');
-      const size = 140; // 미리보기와 동일한 크기
-      canvas.width = size;
-      canvas.height = size;
+      const editorSize = 380;
+      const previewSize = 140;
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas context 실패');
+      // 1단계: 편집 영역 크기로 임시 Canvas 생성
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = editorSize;
+      tempCanvas.height = editorSize;
+      const tempCtx = tempCanvas.getContext('2d');
+      if (!tempCtx) throw new Error('Canvas context 실패');
 
-      // 원형 마스크 생성
-      ctx.beginPath();
-      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-      ctx.clip();
-
-      // 배경 흰색
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, size, size);
-
-      // 이미지 로드 및 그리기
+      // 2단계: 이미지를 편집 영역 기준으로 그리기
       const img = new Image();
       img.crossOrigin = 'anonymous';
 
       img.onload = function() {
         try {
-          const editorSize = 380;
           const scaledWidth = img.width * imageScale;
           const scaledHeight = img.height * imageScale;
 
-          // 편집 영역에서의 위치를 캔버스 크기(140px)에 맞게 변환
-          // 미리보기와 동일한 계산: left: imagePosition.x * (140/380)
-          const offsetX = imagePosition.x * (size / editorSize);
-          const offsetY = imagePosition.y * (size / editorSize);
-
-          // 이미지 크기도 동일한 비율로 축소
-          const drawWidth = scaledWidth * (size / editorSize);
-          const drawHeight = scaledHeight * (size / editorSize);
-
-          ctx.drawImage(
+          // 편집 영역 기준으로 이미지 배치
+          tempCtx.drawImage(
             img,
-            offsetX,
-            offsetY,
-            drawWidth,
-            drawHeight
+            imagePosition.x,
+            imagePosition.y,
+            scaledWidth,
+            scaledHeight
           );
 
-          const result = canvas.toDataURL('image/png');
+          // 3단계: 최종 Canvas 생성 (140x140)
+          const finalCanvas = document.createElement('canvas');
+          finalCanvas.width = previewSize;
+          finalCanvas.height = previewSize;
+          const finalCtx = finalCanvas.getContext('2d');
+
+          // 4단계: 원형 마스크 생성
+          finalCtx.beginPath();
+          finalCtx.arc(previewSize / 2, previewSize / 2, previewSize / 2, 0, Math.PI * 2);
+          finalCtx.clip();
+
+          // 5단계: 배경 흰색
+          finalCtx.fillStyle = 'white';
+          finalCtx.fillRect(0, 0, previewSize, previewSize);
+
+          // 6단계: 임시 Canvas의 중앙 부분 복사 (미리보기에서 보이는 부분)
+          const startX = (editorSize - previewSize) / 2;
+          const startY = (editorSize - previewSize) / 2;
+
+          finalCtx.drawImage(
+            tempCanvas,
+            startX,
+            startY,
+            previewSize,
+            previewSize,
+            0,
+            0,
+            previewSize,
+            previewSize
+          );
+
+          const result = finalCanvas.toDataURL('image/png');
           setProfileImage(result);
           setShowImageEditor(false);
           setTempImage(null);

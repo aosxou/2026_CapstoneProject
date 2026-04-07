@@ -1425,7 +1425,7 @@ function ProfilePage() {
     let newY = e.clientY - dragStart.y;
 
     // 이미지가 편집 영역을 벗어나지 않도록 제한 (미리보기가 항상 유효한 이미지 부분 보도록)
-    const editorSize = 280;
+    const editorSize = 380;
     const maxOffsetX = 0;
     const minOffsetX = -editorSize * (imageScale - 1);
     const maxOffsetY = 0;

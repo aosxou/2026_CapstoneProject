@@ -681,12 +681,7 @@ function SchedulePage({ onNavTo }) {
                 background: bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: (sp && sp !== "today") ? 1 : 0.8, transform: "none" }}
                 onMouseEnter={(e) => { if (sp && sp !== "today") { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
-                <div style={{ position: "relative", display: "inline-block" }}>
-                  <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
-                  {sp === "today" && (
-                    <div style={{ position: "absolute", right: -4, top: 2, width: 6, height: 6, borderRadius: "50%", background: "#E0F2FE", border: "1px solid #B3D9FF" }}></div>
-                  )}
-                </div>
+                <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
                 {sp && sp !== "today" && (
                   <span style={{ fontSize: 9, fontWeight: 500, color: colorMap[sp] || C.purple, marginTop: 4, lineHeight: 1.2 }}>
                     {eventTitles[d]}

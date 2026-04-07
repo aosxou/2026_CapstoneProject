@@ -1285,6 +1285,8 @@ function ProfilePage() {
   const [settingsTab, setSettingsTab] = useState("profile");
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const fileInputRef = useRef(null);
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
 
   const handleSave = () => {
@@ -1299,6 +1301,17 @@ function ProfilePage() {
 
   const handleSaveCancel = () => {
     setShowSaveConfirm(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file && ["image/png", "image/jpeg"].includes(file.type)) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setProfileImage(event.target?.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -1317,14 +1330,17 @@ function ProfilePage() {
           {settingsTab === "profile" && (
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 26, fontWeight: 700 }}>이</div>
+                <div style={{ width: 72, height: 72, borderRadius: "50%", background: profileImage ? `url(${profileImage})` : `linear-gradient(135deg,${C.purple},${C.purpleLight})`, backgroundSize: "cover", backgroundPosition: "center", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 26, fontWeight: 700, overflow: "hidden" }}>
+                  {!profileImage && "이"}
+                </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>이가윤</div>
                   <div style={{ fontSize: 12, color: C.textLight, marginBottom: 10 }}>컴퓨터소프트웨어과</div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: C.purpleBg, color: C.purple, border: "none", fontFamily: "inherit" }}>사진 변경</button>
-                    <button style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: "#F5F5F5", color: C.textMid, border: "none", fontFamily: "inherit" }}>삭제</button>
+                    <button onClick={() => fileInputRef.current?.click()} style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: C.purpleBg, color: C.purple, border: "none", fontFamily: "inherit" }}>사진 변경</button>
+                    <button onClick={() => setProfileImage(null)} style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: "#F5F5F5", color: C.textMid, border: "none", fontFamily: "inherit" }}>삭제</button>
                   </div>
+                  <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" onChange={handleImageChange} style={{ display: "none" }} />
                 </div>
               </div>
               <hr style={{ border: "none", borderTop: `1px solid ${C.purpleBorder}`, margin: "0 0 24px" }} />

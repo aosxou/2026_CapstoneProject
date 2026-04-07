@@ -140,6 +140,30 @@ function LoginPage({ onLogin, goSignup }) {
 function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen, setSidebarOpen }) {
   const [dd, setDd] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('profileImage');
+    if (saved) setProfileImage(saved);
+
+    // localStorage 변경 감지 (다른 탭)
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem('profileImage');
+      if (updated) setProfileImage(updated);
+    };
+
+    // 같은 탭에서의 변경 감지
+    const handleProfileImageUpdated = (e) => {
+      setProfileImage(e.detail);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('profileImageUpdated', handleProfileImageUpdated);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('profileImageUpdated', handleProfileImageUpdated);
+    };
+  }, []);
   const notificationsRaw = [
     { id: 0, type: "highlight", title: "공지사항", message: "2026-03-19 기능 업데이트 사항", time: "방금", pinned: true },
     { id: 1, type: "highlight", title: "졸업예비심사 신청", message: "3월 22일이 마감입니다", time: "3시간 전", pinned: true },
@@ -227,7 +251,13 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen,
           </div>
           <div style={{ position: "relative" }} onClick={e => { e.stopPropagation(); setDd(p => !p); setNotifOpen(false); }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "4px 10px 4px 4px", borderRadius: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 13, fontWeight: 700 }}>이</div>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: profileImage ? "white" : `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 13, fontWeight: 700, overflow: "hidden" }}>
+                {profileImage ? (
+                  <img src={profileImage} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                ) : (
+                  "이"
+                )}
+              </div>
               <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>이가윤</span>
               <span style={{ fontSize: 11, color: C.textLight }}>▾</span>
             </div>
@@ -1402,6 +1432,9 @@ function ProfilePage() {
 
           const result = finalCanvas.toDataURL('image/png');
           setProfileImage(result);
+          localStorage.setItem('profileImage', result);
+          // Header 업데이트를 위한 custom 이벤트 발생
+          window.dispatchEvent(new CustomEvent('profileImageUpdated', { detail: result }));
           setShowImageEditor(false);
           setTempImage(null);
         } catch (e) {

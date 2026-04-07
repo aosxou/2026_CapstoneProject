@@ -1452,19 +1452,29 @@ function ProfilePage() {
                   width: 72,
                   height: 72,
                   borderRadius: "50%",
-                  background: profileImage ? `url(${profileImage})` : `linear-gradient(135deg,${C.purple},${C.purpleLight})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
+                  background: profileImage ? "white" : `linear-gradient(135deg,${C.purple},${C.purpleLight})`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "white",
                   fontSize: 26,
                   fontWeight: 700,
-                  overflow: "hidden"
+                  overflow: "hidden",
+                  position: "relative"
                 }}>
-                  {!profileImage && "이"}
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        borderRadius: "50%"
+                      }}
+                    />
+                  ) : (
+                    "이"
+                  )}
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>이가윤</div>

@@ -1530,7 +1530,7 @@ function ProfilePage() {
 
       {/* 사진 편집 모달 */}
       {showImageEditor && tempImage && (
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001, onMouseMove: handleMouseMove, onMouseUp: handleMouseUp, onMouseLeave: handleMouseUp }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseLeave}>
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1001 }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
           <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 1000, width: "90%", boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
             <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 20 }}>사진 편집</div>
 

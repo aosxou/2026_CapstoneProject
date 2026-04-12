@@ -137,7 +137,7 @@ function LoginPage({ onLogin, goSignup }) {
 }
 
 // ── App Shell ──
-function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
+function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen, setSidebarOpen }) {
   const [dd, setDd] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const notificationsRaw = [
@@ -154,10 +154,13 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
     return () => document.removeEventListener("click", h);
   }, []);
   return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 50, background: C.white, borderBottom: `1px solid ${C.purpleBorder}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 700, fontSize: 17, color: C.text, width: 200, flexShrink: 0 }}>
-        <img src={logo} alt="LittleBoss" style={{ width: 44, height: 44, borderRadius: 8 }} />
-        LittleBoss
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 58, zIndex: 50, background: C.white, borderBottom: `1px solid ${C.purpleBorder}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16, minWidth: "1200px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ width: 36, height: 36, borderRadius: 8, border: "none", background: C.purpleBg, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, color: C.purple }}>☰</button>
+        <div onClick={() => onNavTo("sub-home")} style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 700, fontSize: 17, color: C.text, cursor: "pointer" }}>
+          <img src={logo} alt="LittleBoss" style={{ width: 44, height: 44, borderRadius: 8 }} />
+          LittleBoss
+        </div>
       </div>
       <span style={{ fontWeight: 700, fontSize: 15, color: C.text }} id="header-title"></span>
       <div style={{ flex: 1 }} />
@@ -246,7 +249,7 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo }) {
   );
 }
 
-function Sidebar({ currentSub, onNavTo }) {
+function Sidebar({ currentSub, onNavTo, sidebarOpen }) {
   const [subOpen, setSubOpen] = useState(false);
   const navItem = (id, icon, label, active) => (
     <div onClick={() => onNavTo(id)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, fontSize: 13, fontWeight: active ? 600 : 500, color: active ? "white" : C.textMid, background: active ? C.purple : "transparent", cursor: "pointer", marginBottom: 2 }}>
@@ -255,7 +258,7 @@ function Sidebar({ currentSub, onNavTo }) {
   );
   const isDocsSub = ["sub-schedule","sub-ongoing","sub-expired"].includes(currentSub);
   return (
-    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto" }}>
+    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto", transform: sidebarOpen ? "translateX(0)" : "translateX(-200px)", transition: "transform 0.3s ease", visibility: sidebarOpen ? "visible" : "hidden" }}>
       {navItem("sub-home", "🏠", "대시보드", currentSub === "sub-home")}
       {navItem("sub-upload", "📎", "문서 업로드", currentSub === "sub-upload")}
       <div onClick={() => setSubOpen(p => !p)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, fontSize: 13, fontWeight: 500, color: isDocsSub ? C.purple : C.textMid, cursor: "pointer", marginBottom: 2 }}>
@@ -299,7 +302,7 @@ function Dashboard({ onNavTo }) {
     else setMonth(month + 1);
   };
 
-  const eventDates = { 3: { 19: "gray", 22: "purple", 27: "green" } };
+  const eventDates = { 3: { 19: "sky", 22: "gray", 27: "green" } };
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
   const calendarDays = [];
@@ -355,7 +358,7 @@ function Dashboard({ onNavTo }) {
                 <span style={{ color: C.textLight }}>완료</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.purple }}></div>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.textLight }}></div>
                 <span style={{ color: C.textLight }}>미완료</span>
               </div>
             </div>
@@ -384,8 +387,8 @@ function Dashboard({ onNavTo }) {
             {["일","월","화","수","목","금","토"].map(d => <div key={d} style={{ fontSize: 10, color: C.textLight, paddingBottom: 6 }}>{d}</div>)}
             {calendarDays.map((d, i) => {
               const eventColor = eventDates[month]?.[d];
-              const colorMap = { red: C.red, purple: C.purple, green: C.green, gray: C.textLight };
-              const bgColorMap = { red: C.redBg, purple: C.purpleBg, green: C.greenBg, gray: "#E5E7EB" };
+              const colorMap = { red: C.red, purple: C.purple, green: C.green, gray: C.textLight, sky: "#0EA5E9" };
+              const bgColorMap = { red: C.redBg, purple: C.purpleBg, green: C.greenBg, gray: "#E5E7EB", sky: "#E0F2FE" };
               return (
                 <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: eventColor ? colorMap[eventColor] : C.textMid, fontWeight: eventColor ? 600 : 400, width: 24, height: 24, borderRadius: "50%", background: eventColor ? bgColorMap[eventColor] : "transparent", margin: "0 auto" }}>
                   {d}
@@ -492,6 +495,10 @@ function Dashboard({ onNavTo }) {
 function UploadPage({ onNavTo }) {
   const [queue, setQueue] = useState([]);
   const [dragging, setDragging] = useState(false);
+  const [uploadConfirm, setUploadConfirm] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState(null);
+  const [checkedFiles, setCheckedFiles] = useState({});
+  const fileInputRef = useRef(null);
   const recentFiles = [
     { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false },
     { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true },
@@ -511,20 +518,46 @@ function UploadPage({ onNavTo }) {
       }, 150);
     });
   };
+
+  const handleFileSelect = (files) => {
+    if (files && files.length > 0) {
+      setFileToUpload(files);
+      setUploadConfirm(true);
+    }
+  };
+
+  const handleConfirmUpload = () => {
+    addFiles(fileToUpload);
+    // 팝업은 열린 상태로 유지하여 업로드 진행 상황 표시
+  };
+
+  const handleCancelUpload = () => {
+    setUploadConfirm(false);
+    setFileToUpload(null);
+  };
+
+  // 모든 파일 업로드 완료 시 팝업 자동 닫기
+  useEffect(() => {
+    if (uploadConfirm && queue.length > 0 && queue.every(f => f.progress === 100)) {
+      setTimeout(() => {
+        setUploadConfirm(false);
+        setFileToUpload(null);
+      }, 800);
+    }
+  }, [queue, uploadConfirm]);
   return (
     <div>
       <div style={{ marginBottom: 24 }}><div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>문서 업로드</div><div style={{ fontSize: 14, color: C.textLight }}>분석할 문서를 업로드하면 AI가 서류·마감일을 자동 추출합니다.</div></div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20, alignItems: "start" }}>
         <div>
           <div onDragOver={e => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
-            onDrop={e => { e.preventDefault(); setDragging(false); addFiles(e.dataTransfer.files); }}
+            onDrop={e => { e.preventDefault(); setDragging(false); handleFileSelect(e.dataTransfer.files); }}
             style={{ border: `2px dashed ${dragging ? C.purple : C.purpleBorder}`, borderRadius: 16, padding: "60px 40px", textAlign: "center", background: dragging ? C.purpleBg : "white", cursor: "pointer", transition: "all .2s" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📂</div>
             <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 8 }}>여기에 파일을 드래그 & 드롭하세요</div>
             <div style={{ fontSize: 13, color: C.textLight, lineHeight: 1.6 }}>또는 아래 버튼으로 파일을 선택하세요<br/>PDF, JPG, PNG, DOCX 지원 · 최대 20MB</div>
             <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 24 }}>
-              <label style={{ ...S.btnPrimary, padding: "10px 20px" }}>📁 파일 선택<input type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => addFiles(e.target.files)} /></label>
-              <button style={S.btnOutline} onClick={() => setQueue([])}>✕ 업로드 취소</button>
+              <label style={{ ...S.btnPrimary, padding: "10px 20px" }}>📁 파일 선택<input ref={fileInputRef} type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={e => handleFileSelect(e.target.files)} /></label>
             </div>
             <div style={{ fontSize: 11, color: C.textLight, marginTop: 12 }}>지원 형식: PDF · DOCX · JPG · PNG · HWP</div>
           </div>
@@ -537,14 +570,20 @@ function UploadPage({ onNavTo }) {
                   <div style={{ fontSize: 11, color: C.textLight, marginTop: 2 }}>{f.size}</div>
                   <div style={{ height: 3, background: "#EDE9FF", borderRadius: 2, marginTop: 6 }}><div style={{ height: "100%", borderRadius: 2, background: C.purple, width: f.progress + "%", transition: "width .3s" }} /></div>
                 </div>
-                <button onClick={() => setQueue(q => q.filter(i => i.id !== f.id))} style={{ width: 24, height: 24, borderRadius: 6, border: "none", background: "#F5F3FF", cursor: "pointer", fontSize: 14, color: C.textLight }}>✕</button>
+                <input type="checkbox" checked={checkedFiles[f.id] || false} onChange={(e) => { setCheckedFiles(prev => ({ ...prev, [f.id]: e.target.checked })); }} style={{ width: 18, height: 18, cursor: "pointer", accentColor: C.purple }} />
               </div>
             ))}
+            {queue.length > 0 && (
+              <div style={{ display: "flex", gap: 10, marginTop: 10, justifyContent: "flex-end" }}>
+                <button onClick={() => { setQueue([]); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ ...S.btnOutline, fontSize: 13 }}>업로드 취소</button>
+                <button onClick={() => {}} style={{ ...S.btnPrimary, fontSize: 13, justifyContent: "center" }}>분석하기</button>
+              </div>
+            )}
           </div>
         </div>
         {/* Recent panel */}
         <div style={{ background: "white", borderRadius: 14, overflow: "hidden" }}>
-          <div style={{ padding: "16px 18px", borderBottom: `1px solid ${C.purpleBorder}`, fontSize: 13, fontWeight: 700 }}>📋 최근 업로드 파일</div>
+          <div style={{ padding: "16px 18px", borderBottom: `1px solid ${C.purpleBorder}`, fontSize: 13, fontWeight: 700 }}>📋 분석 완료 파일</div>
           <div style={{ padding: 8, maxHeight: 520, overflowY: "auto" }}>
             {recentFiles.map(f => (
               <div key={f.id} onClick={() => onNavTo("doc-analysis", f.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px", borderRadius: 9, cursor: "pointer", marginBottom: 2, transition: "all 0.2s", background: "transparent", hover: { background: C.purpleBg } }}>
@@ -553,12 +592,58 @@ function UploadPage({ onNavTo }) {
                   <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
                   <div style={{ fontSize: 11, color: C.textLight, marginTop: 2 }}>{f.date}</div>
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 20, background: f.done ? C.greenBg : C.purpleBg, color: f.done ? C.green : C.purple }}>{f.done ? "완료" : "진행"}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* 업로드 확인 팝업 */}
+      {uploadConfirm && fileToUpload && queue.length === 0 && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 380, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>파일 업로드</div>
+            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24, lineHeight: 1.6 }}>
+              {[...fileToUpload].slice(0, 2).map(f => f.name).join(", ")}
+              {fileToUpload.length > 2 ? ` 외 ${fileToUpload.length - 2}개` : ""}
+              <br/>파일을 업로드 하시겠습니까?
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={handleCancelUpload} style={{ ...S.btnOutline, flex: 1, fontSize: 13, justifyContent: "center" }}>취소</button>
+              <button onClick={handleConfirmUpload} style={{ ...S.btnPrimary, flex: 1, fontSize: 13, justifyContent: "center" }}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 업로드 진행 중 팝업 */}
+      {uploadConfirm && queue.length > 0 && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, maxWidth: 420, boxShadow: "0 20px 48px rgba(0,0,0,0.2)", maxHeight: 500, overflowY: "auto" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 20, textAlign: "center" }}>파일 업로드 중</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {queue.map(f => (
+                <div key={f.id} style={{ background: C.purpleBg, borderRadius: 10, padding: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 18 }}>📄</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: C.text }}>{f.name}</div>
+                      <div style={{ fontSize: 10, color: C.textLight, marginTop: 2 }}>{f.size}</div>
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: C.purple, minWidth: 40, textAlign: "right" }}>{Math.round(f.progress)}%</div>
+                  </div>
+                  <div style={{ height: 4, background: "#E5E7EB", borderRadius: 2 }}>
+                    <div style={{ height: "100%", borderRadius: 2, background: C.purple, width: f.progress + "%", transition: "width .3s" }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {queue.every(f => f.progress === 100) && (
+              <div style={{ textAlign: "center", marginTop: 20, fontSize: 14, color: C.green, fontWeight: 600 }}>✅ 업로드 완료</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -648,7 +733,7 @@ function SchedulePage({ onNavTo }) {
 function CheckItem({ label, defaultChecked }) {
   const [checked, setChecked] = useState(defaultChecked);
   return (
-    <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: checked ? C.textLight : C.textMid, cursor: "pointer", textDecoration: checked ? "line-through" : "none" }}>
+    <label style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid, cursor: "pointer" }}>
       <input type="checkbox" checked={checked} onChange={() => setChecked(p => !p)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
       {label}
     </label>
@@ -657,9 +742,9 @@ function CheckItem({ label, defaultChecked }) {
 
 function OngoingPage({ onNavTo }) {
   const docsInitial = [
-    { title:"국가장학금 신청", upload:"2026.03.14", deadline:"2026-03-22 17:00 · D-3", dc: C.red, db: C.redBg,
+    { title:"국가장학금 신청", upload:"2026.03.14", deadline:"2026-03-22 17:00 · D-3", dc: C.red, db: C.redBg, scheduleDay: 22,
       checks:[{l:"소득분위 확인서 제출"},{l:"학교 포털 신청서 작성 완료"},{l:"주민등록등본 업로드"},{l:"가족관계증명서 제출"},{l:"재학증명서 제출"}], total:5 },
-    { title:"졸업예비심사 신청", upload:"2026.03.10", deadline:"2026-03-22 18:00 · D-8", dc:"#EA580C", db:"#FFF7ED",
+    { title:"졸업예비심사 신청", upload:"2026.03.10", deadline:"2026-03-22 18:00 · D-8", dc:"#EA580C", db:"#FFF7ED", scheduleDay: 22,
       checks:[{l:"졸업논문 계획서 초안 작성"},{l:"지도교수 확인서 수령"},{l:"학교 포털 심사 신청"}], total:3 },
   ];
 
@@ -694,15 +779,18 @@ function OngoingPage({ onNavTo }) {
           return (
             <div key={doc.title} style={S.card}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                <div><div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{doc.title}</div><div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div></div>
+                <div onClick={() => onNavTo("schedule-detail", doc.scheduleDay)} style={{ cursor: "pointer", flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.purple, textDecoration: "underline" }}>{doc.title}</div>
+                  <div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div>
+                </div>
                 <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12 }}>
                 {doc.checks.map((c, idx) => (
-                  <label key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: checked[idx] ? C.textLight : C.textMid, cursor: "pointer", textDecoration: checked[idx] ? "line-through" : "none" }}>
+                  <div key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid }}>
                     <input type="checkbox" checked={checked[idx]} onChange={() => toggleCheck(doc.title, idx)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
-                    {c.l}
-                  </label>
+                    <span>{c.l}</span>
+                  </div>
                 ))}
               </div>
               <div style={{ height: 5, background: "#EDE9FF", borderRadius: 3, marginTop: 14 }}><div style={{ height: "100%", borderRadius: 3, background: C.purple, width: percentage+"%" }} /></div>
@@ -724,9 +812,13 @@ function ExpiredPage({ onNavTo }) {
     { ago:"70일 전", title:"휴학 신청", upload:"2026.01.05", deadline:"2026.01.08", done:3, total:3, checks:[{l:"휴학 신청서 제출"},{l:"학생증 사본 제출"}] },
   ];
 
+  const [docs, setDocs] = useState(docsInitial);
   const [checkStates, setCheckStates] = useState(
     Object.fromEntries(docsInitial.map(doc => [doc.title, Array(doc.checks.length).fill(doc.done === doc.total)]))
   );
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
 
   const toggleCheck = (docTitle, idx) => {
     setCheckStates(prev => ({
@@ -735,11 +827,29 @@ function ExpiredPage({ onNavTo }) {
     }));
   };
 
+  const handleDeleteClick = (docTitle) => {
+    setDeleteTarget(docTitle);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setShowDeleteConfirm(false);
+    setDocs(prev => prev.filter(doc => doc.title !== deleteTarget));
+    setShowDeleteSuccess(true);
+    setTimeout(() => setShowDeleteSuccess(false), 2000);
+    setDeleteTarget(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setDeleteTarget(null);
+  };
+
   return (
     <div>
       <div style={{ marginBottom: 24 }}><div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>마감된 문서</div><div style={{ fontSize: 14, color: C.textLight }}>마감이 지난 문서 목록입니다.</div></div>
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        {docsInitial.map(doc => {
+        {docs.map(doc => {
           const checked = checkStates[doc.title];
           const doneCount = checked.filter(Boolean).length;
 
@@ -749,16 +859,19 @@ function ExpiredPage({ onNavTo }) {
                 <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doneCount === doc.checks.length ? "#F0FDF4" : "#FFE5E5", color: doneCount === doc.checks.length ? C.green : C.red }}>
                   {doneCount === doc.checks.length ? '완료' : '미완료'}
                 </span>
-                <span style={{ fontSize: 11, color: C.textLight }}>{doc.deadline} 17:00</span>
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <span style={{ fontSize: 11, color: C.textLight }}>{doc.deadline} 17:00</span>
+                  <button onClick={() => handleDeleteClick(doc.title)} style={{ ...S.btnOutline, fontSize: 11, padding: "5px 10px", color: C.red, borderColor: C.red }}>🗑️ 삭제</button>
+                </div>
               </div>
               <div style={{ fontSize: 16, fontWeight: 700, margin: "10px 0 4px" }}>{doc.title}</div>
               <div style={{ fontSize: 12, color: C.textLight, marginBottom: 14 }}>📎 업로드: {doc.upload} · 마감: {doc.deadline}</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {doc.checks.map((c, idx) => (
-                  <label key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: checked[idx] ? C.textLight : C.textMid, cursor: "pointer", textDecoration: checked[idx] ? "line-through" : "none" }}>
-                    <input type="checkbox" checked={checked[idx]} onChange={() => toggleCheck(doc.title, idx)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
-                    {c.l}
-                  </label>
+                  <div key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid }}>
+                    <input type="checkbox" checked={checked[idx]} disabled style={{ accentColor: C.purple, width: 15, height: 15, cursor: "not-allowed", opacity: 0.7 }} />
+                    <span>{c.l}</span>
+                  </div>
                 ))}
               </div>
               <div style={{ height: 5, background: "#F0EEF8", borderRadius: 3, marginTop: 14 }}><div style={{ height: "100%", borderRadius: 3, background: C.purple, width: (doneCount/doc.checks.length*100)+"%" }} /></div>
@@ -770,6 +883,30 @@ function ExpiredPage({ onNavTo }) {
           );
         })}
       </div>
+
+      {/* 삭제 확인 팝업 */}
+      {showDeleteConfirm && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 320, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>삭제하시겠습니까?</div>
+            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24 }}>{deleteTarget}을(를) 삭제합니다</div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={handleDeleteCancel} style={{ ...S.btnOutline, fontSize: 13 }}>아니오</button>
+              <button onClick={handleDeleteConfirm} style={{ ...S.btnPrimary, fontSize: 13 }}>예</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 삭제 성공 팝업 */}
+      {showDeleteSuccess && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 320, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 18, marginBottom: 8 }}>✅</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>삭제되었습니다</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -849,7 +986,7 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                 <input type="checkbox" checked={checks[idx] || false} onChange={() => toggleCheck(idx)} style={{ accentColor: data.color, width: 16, height: 16 }} />
-                <span style={{ textDecoration: checks[idx] ? "line-through" : "none", color: checks[idx] ? C.textLight : C.textMid }}>{doc}</span>
+                <span style={{ color: C.textMid }}>{doc}</span>
               </label>
             ))}
           </div>
@@ -1166,7 +1303,7 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
                 <input type="checkbox" checked={checks[idx] || false} onChange={() => toggleCheck(idx)} style={{ accentColor: statusColor, width: 16, height: 16 }} />
-                <span style={{ textDecoration: checks[idx] ? "line-through" : "none", color: checks[idx] ? C.textLight : C.textMid }}>{doc}</span>
+                <span style={{ color: C.textMid }}>{doc}</span>
               </label>
             ))}
           </div>
@@ -1214,12 +1351,19 @@ function Toggle({ defaultOn = false }) {
 
 function ProfilePage() {
   const [settingsTab, setSettingsTab] = useState("profile");
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
+
+  const handleSave = () => {
+    setShowSaveSuccess(true);
+    setTimeout(() => setShowSaveSuccess(false), 2000);
+  };
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div><div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>내 정보</div><div style={{ fontSize: 14, color: C.textLight }}>계정 정보와 알림 설정을 관리하세요.</div></div>
-        <button style={S.btnPrimary}>저장하기</button>
+        <button onClick={handleSave} style={S.btnPrimary}>저장하기</button>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: 20, alignItems: "start" }}>
         <div style={{ background: "white", borderRadius: 14, overflow: "hidden" }}>
@@ -1302,6 +1446,16 @@ function ProfilePage() {
           )}
         </div>
       </div>
+
+      {/* 저장 완료 팝업 */}
+      {showSaveSuccess && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 320, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 18, marginBottom: 8 }}>✅</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>저장되었습니다</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1315,6 +1469,7 @@ export default function App() {
   const [scheduleDetailDay, setScheduleDetailDay] = useState(null);
   const [docDetailData, setDocDetailData] = useState(null);
   const [docAnalysisId, setDocAnalysisId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { msg, show, toast } = useToast();
 
   const titleMap = { "sub-home":"대시보드","sub-upload":"문서 업로드","sub-schedule":"일정 관리","sub-ongoing":"진행 중인 문서","sub-expired":"마감된 문서","sub-profile":"내 정보", "schedule-detail":"일정 상세", "doc-detail":"문서 상세", "notif-announcement":"공지사항", "notif-analysis":"문서 분석 결과", "doc-analysis":"문서 분석 결과" };
@@ -1345,10 +1500,10 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Noto Sans KR', sans-serif" }}>
       <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-      <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} />
-      <div style={{ display: "flex", paddingTop: 58, minHeight: "calc(100vh - 58px)" }}>
-        <Sidebar currentSub={sub} onNavTo={navTo} />
-        <main style={{ marginLeft: 200, flex: 1, padding: "28px 28px 40px 48px" }}>
+      <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div style={{ display: "flex", paddingTop: 58, minHeight: "calc(100vh - 58px)", minWidth: "1200px" }}>
+        <Sidebar currentSub={sub} onNavTo={navTo} sidebarOpen={sidebarOpen} />
+        <main style={{ marginLeft: sidebarOpen ? 200 : 0, flex: 1, padding: "28px 28px 40px 48px", transition: "marginLeft 0.3s ease" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.textLight, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{titleMap[sub]}</div>
           {sub === "sub-home" && <Dashboard onNavTo={navTo} />}
           {sub === "sub-upload" && <UploadPage onNavTo={navTo} />}
@@ -1375,3 +1530,4 @@ function ToastEl({ msg, show }) {
     </div>
   );
 }
+// Stable version

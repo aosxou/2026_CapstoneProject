@@ -1,0 +1,215 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: LittleBoss - Document Analysis & Deadline Management
+
+Globals:
+  Function:
+    Runtime: python3.11
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        DOCUMENTS_TABLE: !Ref DocumentsTable
+        CHECKLISTS_TABLE: !Ref ChecklistsTable
+        USERS_TABLE: !Ref UsersTable
+        S3_BUCKET: !Ref UploadBucket
+        GEMINI_API_KEY: !Ref GeminiApiKey
+
+Parameters:
+  GeminiApiKey:
+    Type: String
+    NoEcho: true
+    Description: Google Gemini API Key
+  GoogleClientId:
+    Type: String
+    Description: Google OAuth Client ID
+  GoogleClientSecret:
+    Type: String
+    NoEcho: true
+    Description: Google OAuth Client Secret
+
+Resources:
+  # ── S3 Bucket ──
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: littleboss-uploads
+      CorsConfiguration:
+        CorsRules:
+          - AllowedOrigins: ["*"]
+            AllowedMethods: [GET, PUT, POST]
+            AllowedHeaders: ["*"]
+
+  # ── DynamoDB Tables ──
+  DocumentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: littleboss-documents
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: doc_id
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: doc_id
+          KeyType: HASH
+        - AttributeName: user_id
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: user_id-index
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  ChecklistsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: littleboss-checklists
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: checklist_id
+          AttributeType: S
+        - AttributeName: doc_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: checklist_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: doc_id-index
+          KeySchema:
+            - AttributeName: doc_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: littleboss-users
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: user_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: user_id
+          KeyType: HASH
+
+  # ── Lambda Functions ──
+  UploadHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      CodeUri: ../backend/upload-handler/
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentsTable
+        - S3CrudPolicy:
+            BucketName: !Ref UploadBucket
+      Events:
+        Upload:
+          Type: Api
+          Properties:
+            Path: /documents/upload
+            Method: post
+            RestApiId: !Ref LittleBossApi
+
+  OcrHandlerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      CodeUri: ../backend/ocr-handler/
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentsTable
+        - S3ReadPolicy:
+            BucketName: !Ref UploadBucket
+        - Statement:
+            - Effect: Allow
+              Action: ["textract:DetectDocumentText"]
+              Resource: "*"
+      Events:
+        Ocr:
+          Type: Api
+          Properties:
+            Path: /documents/ocr
+            Method: post
+            RestApiId: !Ref LittleBossApi
+
+  AiAnalyzerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      CodeUri: ../backend/ai-analyzer/
+      Timeout: 60
+      Layers:
+        - !Ref CommonLayer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ChecklistsTable
+      Events:
+        Analyze:
+          Type: Api
+          Properties:
+            Path: /documents/analyze
+            Method: post
+            RestApiId: !Ref LittleBossApi
+
+  ActionExecutorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      CodeUri: ../backend/action-executor/
+      Layers:
+        - !Ref CommonLayer
+      Environment:
+        Variables:
+          GOOGLE_CLIENT_ID: !Ref GoogleClientId
+          GOOGLE_CLIENT_SECRET: !Ref GoogleClientSecret
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+      Events:
+        Execute:
+          Type: Api
+          Properties:
+            Path: /documents/execute
+            Method: post
+            RestApiId: !Ref LittleBossApi
+
+  # ── Common Layer ──
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: littleboss-common
+      ContentUri: ../backend/
+      CompatibleRuntimes:
+        - python3.11
+
+  # ── API Gateway ──
+  LittleBossApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowMethods: "'GET,POST,PATCH,OPTIONS'"
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${LittleBossApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  UploadBucketName:
+    Value: !Ref UploadBucket

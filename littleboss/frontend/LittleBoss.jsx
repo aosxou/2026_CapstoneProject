@@ -171,7 +171,10 @@ function SignupPage({ onLogin, goLogin, toast }) {
       </div>
       <div style={{ marginBottom: 16 }}>
         <label style={S.label}>인증번호</label>
-        <input style={S.formInput} type="text" placeholder="인증번호 입력" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input style={{ ...S.formInput, flex: 1 }} type="text" placeholder="인증번호 입력" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+          <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }} onClick={() => { if (!verifyCode) { toast("인증번호를 입력해주세요"); } else { toast("인증번호가 확인되었어요 ✅"); } }}>확인</button>
+        </div>
       </div>
       <div style={{ marginBottom: 16 }}>
         <label style={S.label}>비밀번호</label>

@@ -47,6 +47,12 @@ const getPasswordErrorMessage = (password) => {
   return null;
 };
 
+// ── Email validation ──
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 // ── Toast ──
 function useToast() {
   const [msg, setMsg] = useState("");
@@ -128,6 +134,10 @@ function SignupPage({ onLogin, goLogin, toast }) {
       toast("이메일을 입력해주세요");
       return;
     }
+    if (!validateEmail(email)) {
+      toast("이메일 형식이 올바르지 않습니다");
+      return;
+    }
     if (!verifyCode) {
       toast("인증번호를 입력해주세요");
       return;
@@ -199,16 +209,41 @@ function SignupPage({ onLogin, goLogin, toast }) {
   );
 }
 
-function LoginPage({ onLogin, goSignup, goForgotPassword }) {
+function LoginPage({ onLogin, goSignup, goForgotPassword, toast }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    if (!email) {
+      toast("이메일을 입력해주세요");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast("이메일 형식이 올바르지 않습니다");
+      return;
+    }
+    if (!password) {
+      toast("비밀번호를 입력해주세요");
+      return;
+    }
+    onLogin("로그인됐어요 👋");
+  };
+
   return (
     <AuthLayout>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>로그인</h2>
       <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>계정에 로그인해 주세요</p>
       <GoogleBtn label="Google 로그인" onClick={() => onLogin("Google 계정으로 로그인됐어요")} />
       <DividerOr />
-      <FormGroup label="이메일" type="email" placeholder="example@email.com" />
-      <FormGroup label="비밀번호" type="password" placeholder="비밀번호 입력" />
-      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 12 }} onClick={() => onLogin("로그인됐어요 👋")}>로그인</button>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>이메일</label>
+        <input style={S.formInput} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>비밀번호</label>
+        <input style={S.formInput} type="password" placeholder="비밀번호 입력" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </div>
+      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 12 }} onClick={handleLogin}>로그인</button>
       <div style={{ textAlign: "center", fontSize: 12, color: C.textLight, marginBottom: 4 }}>
         <span style={{ color: C.purple, cursor: "pointer" }} onClick={goForgotPassword}>비밀번호를 잊으셨나요?</span>
       </div>
@@ -229,6 +264,10 @@ function ForgotPasswordPage({ toast, goLogin }) {
   const handleEmailSubmit = () => {
     if (!email) {
       toast("이메일을 입력해주세요");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast("이메일 형식이 올바르지 않습니다");
       return;
     }
     toast("인증 코드를 이메일로 발송했어요 📩");
@@ -1936,7 +1975,7 @@ export default function App() {
   }, [sub, scheduleDetailDay, scheduleDetailTitle, docDetailData]);
 
   if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} toast={toast} /><ToastEl msg={msg} show={show} /></>;
-  if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} goForgotPassword={() => setPage("forgot-password")} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} goForgotPassword={() => setPage("forgot-password")} toast={toast} /><ToastEl msg={msg} show={show} /></>;
   if (page === "forgot-password") return <><ForgotPasswordPage toast={toast} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
 
   return (

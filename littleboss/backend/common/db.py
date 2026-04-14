@@ -13,6 +13,7 @@ from boto3.dynamodb.conditions import Key
 DOCUMENTS_TABLE = os.environ.get("DOCUMENTS_TABLE", "littleboss-documents")
 CHECKLISTS_TABLE = os.environ.get("CHECKLISTS_TABLE", "littleboss-checklists")
 USERS_TABLE = os.environ.get("USERS_TABLE", "littleboss-users")
+EMBEDDINGS_TABLE = os.environ.get("EMBEDDINGS_TABLE", "littleboss-embeddings")
 
 
 # =========================
@@ -23,6 +24,7 @@ dynamodb = boto3.resource("dynamodb")
 documents_table = dynamodb.Table(DOCUMENTS_TABLE)
 checklists_table = dynamodb.Table(CHECKLISTS_TABLE)
 users_table = dynamodb.Table(USERS_TABLE)
+embeddings_table = dynamodb.Table(EMBEDDINGS_TABLE)
 
 
 # =========================
@@ -427,4 +429,61 @@ def delete_checklist(checklist_id: str) -> None:
     """
     checklists_table.delete_item(
         Key={"checklist_id": checklist_id}
+    )
+
+
+# =========================
+# Embeddings table
+# =========================
+def save_embedding(
+    doc_id: str,
+    user_id: str,
+    embedding: List[float],
+    document_type: str,
+    summary: str,
+    updated_at: str
+) -> None:
+    """
+    Save document embedding vector to DynamoDB.
+    """
+    from decimal import Decimal
+    embedding_decimal = [Decimal(str(v)) for v in embedding]
+
+    embeddings_table.put_item(Item={
+        "doc_id": doc_id,
+        "user_id": user_id,
+        "embedding": embedding_decimal,
+        "document_type": document_type,
+        "summary": summary,
+        "updated_at": updated_at,
+    })
+
+
+def get_all_embeddings_by_user(user_id: str) -> List[Dict[str, Any]]:
+    """
+    Scan embeddings table and filter by user_id.
+    Works well for small-scale (hundreds of documents).
+    """
+    response = embeddings_table.scan(
+        FilterExpression=Key("user_id").eq(user_id)
+    )
+    items = response.get("Items", [])
+
+    # Handle pagination
+    while "LastEvaluatedKey" in response:
+        response = embeddings_table.scan(
+            FilterExpression=Key("user_id").eq(user_id),
+            ExclusiveStartKey=response["LastEvaluatedKey"]
+        )
+        items.extend(response.get("Items", []))
+
+    return items
+
+
+def delete_embedding(doc_id: str) -> None:
+    """
+    Delete an embedding by doc_id.
+    """
+    embeddings_table.delete_item(
+        Key={"doc_id": doc_id}
     )

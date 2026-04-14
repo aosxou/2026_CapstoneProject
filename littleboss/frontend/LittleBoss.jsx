@@ -101,7 +101,13 @@ function SignupPage({ onLogin, goLogin }) {
       <GoogleBtn label="Google로 계속하기" onClick={() => onLogin("Google 계정으로 가입됐어요 🎉")} />
       <DividerOr />
       <FormGroup label="이름" placeholder="홍길동" />
-      <FormGroup label="이메일" type="email" placeholder="example@email.com" />
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>이메일</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input style={{ ...S.formInput, flex: 1 }} type="email" placeholder="example@email.com" />
+          <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }}>인증번호 보내기</button>
+        </div>
+      </div>
       <FormGroup label="인증번호" type="text" placeholder="인증번호 입력" />
       <FormGroup label="비밀번호" type="password" placeholder="8자 이상 입력" hint="영문, 숫자, 특수문자 포함 8자 이상" />
       <FormGroup label="비밀번호 확인" type="password" placeholder="비밀번호 재입력" />

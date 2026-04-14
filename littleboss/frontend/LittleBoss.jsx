@@ -137,15 +137,98 @@ function LoginPage({ onLogin, goSignup, goForgotPassword }) {
 }
 
 function ForgotPasswordPage({ toast, goLogin }) {
+  const [step, setStep] = useState(1); // 1: email, 2: code, 3: password reset
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleEmailSubmit = () => {
+    if (!email) {
+      toast("이메일을 입력해주세요");
+      return;
+    }
+    toast("인증 코드를 이메일로 발송했어요 📩");
+    setStep(2);
+  };
+
+  const handleCodeSubmit = () => {
+    if (!code) {
+      toast("인증 코드를 입력해주세요");
+      return;
+    }
+    toast("코드가 확인되었어요 ✅");
+    setStep(3);
+  };
+
+  const handlePasswordReset = () => {
+    if (!newPassword || !confirmPassword) {
+      toast("비밀번호를 입력해주세요");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast("비밀번호가 일치하지 않습니다");
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast("비밀번호는 8자 이상이어야 합니다");
+      return;
+    }
+    toast("비밀번호가 재설정되었어요 🎉");
+    goLogin();
+  };
+
   return (
     <AuthLayout>
-      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 찾기</h2>
-      <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>가입한 이메일을 입력하면 재설정 링크를 보내드립니다</p>
-      <FormGroup label="이메일" type="email" placeholder="example@email.com" />
-      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={() => { toast("이메일을 발송했어요 📩"); goLogin(); }}>이메일 보내기</button>
-      <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
-        <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goLogin}>로그인으로 돌아가기</span>
-      </div>
+      {step === 1 && (
+        <>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 찾기</h2>
+          <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>가입한 이메일을 입력하면 인증 코드를 보내드립니다</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>이메일</label>
+            <input style={S.formInput} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handleEmailSubmit}>이메일 보내기</button>
+          <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+            <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goLogin}>로그인으로 돌아가기</span>
+          </div>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>인증 코드 입력</h2>
+          <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>이메일로 받은 인증 코드를 입력해주세요</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>인증 코드</label>
+            <input style={S.formInput} type="text" placeholder="000000" value={code} onChange={(e) => setCode(e.target.value)} maxLength="6" />
+          </div>
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handleCodeSubmit}>코드 확인</button>
+          <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+            <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={() => setStep(1)}>이전 단계로</span>
+          </div>
+        </>
+      )}
+
+      {step === 3 && (
+        <>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 재설정</h2>
+          <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>새로운 비밀번호를 입력해주세요</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>새 비밀번호</label>
+            <input style={S.formInput} type="password" placeholder="8자 이상 입력" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <p style={{ fontSize: 11, color: C.textLight, marginTop: 5 }}>영문, 숫자, 특수문자 포함 8자 이상</p>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>비밀번호 확인</label>
+            <input style={S.formInput} type="password" placeholder="비밀번호 재입력" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          </div>
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handlePasswordReset}>비밀번호 재설정</button>
+          <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+            <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={() => setStep(2)}>이전 단계로</span>
+          </div>
+        </>
+      )}
     </AuthLayout>
   );
 }

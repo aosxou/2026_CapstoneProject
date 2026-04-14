@@ -29,6 +29,30 @@ const S = {
   label: { fontSize: 13, fontWeight: 600, color: C.textMid, display: "block", marginBottom: 6 },
 };
 
+// ── Password validation ──
+const validatePassword = (password) => {
+  const hasEnglish = /[a-zA-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+=\-\[\]{};':"\\|,.<>\/?]/.test(password);
+  const isLongEnough = password.length >= 8;
+  return hasEnglish && hasNumber && hasSpecial && isLongEnough;
+};
+
+const getPasswordErrorMessage = (password) => {
+  if (!password) return "비밀번호를 입력해주세요";
+  if (password.length < 8) return "비밀번호는 8자 이상이어야 합니다";
+  if (!/[a-zA-Z]/.test(password)) return "영문을 포함해주세요";
+  if (!/\d/.test(password)) return "숫자를 포함해주세요";
+  if (!/[!@#$%^&*()_+=\-\[\]{};':"\\|,.<>\/?]/.test(password)) return "특수기호를 포함해주세요";
+  return null;
+};
+
+// ── Email validation ──
+const validateEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 // ── Toast ──
 function useToast() {
   const [msg, setMsg] = useState("");
@@ -93,22 +117,92 @@ function FormGroup({ label, type = "text", placeholder, hint }) {
   );
 }
 
-function SignupPage({ onLogin, goLogin }) {
+function SignupPage({ onLogin, goLogin, toast }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
+  const handleSignup = () => {
+    if (!name) {
+      toast("이름을 입력해주세요");
+      return;
+    }
+    if (!email) {
+      toast("이메일을 입력해주세요");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast("이메일 형식이 올바르지 않습니다");
+      return;
+    }
+    if (!verifyCode) {
+      toast("인증번호를 입력해주세요");
+      return;
+    }
+    const passwordError = getPasswordErrorMessage(password);
+    if (passwordError) {
+      toast(passwordError);
+      return;
+    }
+    if (!confirmPassword) {
+      toast("비밀번호 확인을 입력해주세요");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast("비밀번호가 일치하지 않습니다");
+      return;
+    }
+    if (!agreeTerms) {
+      toast("약관에 동의해주세요");
+      return;
+    }
+    onLogin("🎉 회원가입이 완료됐어요!");
+  };
+
   return (
     <AuthLayout>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>회원가입</h2>
       <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>계정을 만들고 AI 행정 비서를 시작하세요</p>
       <GoogleBtn label="Google로 계속하기" onClick={() => onLogin("Google 계정으로 가입됐어요 🎉")} />
       <DividerOr />
-      <FormGroup label="이름" placeholder="홍길동" />
-      <FormGroup label="이메일" type="email" placeholder="example@email.com" />
-      <FormGroup label="비밀번호" type="password" placeholder="8자 이상 입력" hint="영문, 숫자, 특수문자 포함 8자 이상" />
-      <FormGroup label="비밀번호 확인" type="password" placeholder="비밀번호 재입력" />
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>이름</label>
+        <input style={S.formInput} type="text" placeholder="홍길동" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>이메일</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input style={{ ...S.formInput, flex: 1 }} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }} onClick={() => { if (!email) { toast("이메일을 입력해주세요"); } else if (!validateEmail(email)) { toast("이메일 형식이 올바르지 않습니다"); } else { toast("인증번호를 이메일로 전송했어요 📩"); } }}>인증번호 보내기</button>
+        </div>
+        {email && !validateEmail(email) && <p style={{ fontSize: 11, color: C.red, marginTop: 5 }}>⚠ 이메일 형식이 올바르지 않습니다</p>}
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>인증번호</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input style={{ ...S.formInput, flex: 1 }} type="text" placeholder="인증번호 입력" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+          <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }} onClick={() => { if (!verifyCode) { toast("인증번호를 입력해주세요"); } else { toast("인증번호가 확인되었어요 ✅"); } }}>확인</button>
+        </div>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>비밀번호</label>
+        <input style={S.formInput} type="password" placeholder="8자 이상 입력" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <p style={{ fontSize: 11, color: password && !validatePassword(password) ? C.red : C.textLight, marginTop: 5 }}>
+          {password && !validatePassword(password) ? "⚠ 영문, 숫자, 특수문자를 모두 포함해야 합니다" : "영문, 숫자, 특수문자 포함 8자 이상"}
+        </p>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>비밀번호 확인</label>
+        <input style={S.formInput} type="password" placeholder="비밀번호 재입력" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+      </div>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: C.textMid, marginBottom: 24 }}>
-        <input type="checkbox" style={{ marginTop: 2, accentColor: C.purple }} />
+        <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} style={{ marginTop: 2, accentColor: C.purple }} />
         <label><span style={{ color: C.purple, cursor: "pointer" }}>이용약관</span> 및 <span style={{ color: C.purple, cursor: "pointer" }}>개인정보 처리방침</span>에 동의합니다.</label>
       </div>
-      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15 }} onClick={() => onLogin("🎉 회원가입이 완료됐어요!")}>가입하기</button>
+      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15 }} onClick={handleSignup}>가입하기</button>
       <div style={{ textAlign: "center", fontSize: 13, color: C.textLight, marginTop: 20 }}>
         이미 계정이 있으신가요? <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goLogin}>로그인</span>
       </div>
@@ -116,18 +210,43 @@ function SignupPage({ onLogin, goLogin }) {
   );
 }
 
-function LoginPage({ onLogin, goSignup }) {
+function LoginPage({ onLogin, goSignup, goForgotPassword, toast }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    if (!email) {
+      toast("이메일을 입력해주세요");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast("이메일 형식이 올바르지 않습니다");
+      return;
+    }
+    if (!password) {
+      toast("비밀번호를 입력해주세요");
+      return;
+    }
+    onLogin("로그인됐어요 👋");
+  };
+
   return (
     <AuthLayout>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>로그인</h2>
       <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>계정에 로그인해 주세요</p>
       <GoogleBtn label="Google 로그인" onClick={() => onLogin("Google 계정으로 로그인됐어요")} />
       <DividerOr />
-      <FormGroup label="이메일" type="email" placeholder="example@email.com" />
-      <FormGroup label="비밀번호" type="password" placeholder="비밀번호 입력" />
-      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 12 }} onClick={() => onLogin("로그인됐어요 👋")}>로그인</button>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>이메일</label>
+        <input style={S.formInput} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>비밀번호</label>
+        <input style={S.formInput} type="password" placeholder="비밀번호 입력" value={password} onChange={(e) => setPassword(e.target.value)} />
+      </div>
+      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 12 }} onClick={handleLogin}>로그인</button>
       <div style={{ textAlign: "center", fontSize: 12, color: C.textLight, marginBottom: 4 }}>
-        <span style={{ color: C.purple, cursor: "pointer" }}>비밀번호를 잊으셨나요?</span>
+        <span style={{ color: C.purple, cursor: "pointer" }} onClick={goForgotPassword}>비밀번호를 잊으셨나요?</span>
       </div>
       <div style={{ textAlign: "center", fontSize: 13, color: C.textLight, marginTop: 16 }}>
         계정이 없으신가요? <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goSignup}>회원가입</span>
@@ -136,10 +255,139 @@ function LoginPage({ onLogin, goSignup }) {
   );
 }
 
+function ForgotPasswordPage({ toast, goLogin }) {
+  const [step, setStep] = useState(1); // 1: email, 2: code, 3: password reset
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleEmailSubmit = () => {
+    if (!email) {
+      toast("이메일을 입력해주세요");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast("이메일 형식이 올바르지 않습니다");
+      return;
+    }
+    toast("인증 코드를 이메일로 발송했어요 📩");
+    setStep(2);
+  };
+
+  const handleCodeSubmit = () => {
+    if (!code) {
+      toast("인증 코드를 입력해주세요");
+      return;
+    }
+    toast("코드가 확인되었어요 ✅");
+    setStep(3);
+  };
+
+  const handlePasswordReset = () => {
+    const passwordError = getPasswordErrorMessage(newPassword);
+    if (passwordError) {
+      toast(passwordError);
+      return;
+    }
+    if (!confirmPassword) {
+      toast("비밀번호 확인을 입력해주세요");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast("비밀번호가 일치하지 않습니다");
+      return;
+    }
+    toast("비밀번호가 재설정되었어요 🎉");
+    goLogin();
+  };
+
+  return (
+    <AuthLayout>
+      {step === 1 && (
+        <>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 재설정</h2>
+          <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>가입한 이메일을 입력하면 인증 코드를 보내드립니다</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>이메일</label>
+            <input style={S.formInput} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            {email && !validateEmail(email) && <p style={{ fontSize: 11, color: C.red, marginTop: 5 }}>⚠ 이메일 형식이 올바르지 않습니다</p>}
+          </div>
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handleEmailSubmit}>이메일 보내기</button>
+          <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+            <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goLogin}>로그인으로 돌아가기</span>
+          </div>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>인증 코드 입력</h2>
+          <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>이메일로 받은 인증 코드를 입력해주세요</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>인증 코드</label>
+            <input style={S.formInput} type="text" placeholder="000000" value={code} onChange={(e) => setCode(e.target.value)} maxLength="6" />
+          </div>
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handleCodeSubmit}>코드 확인</button>
+          <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+            <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={() => setStep(1)}>이전 단계로</span>
+          </div>
+        </>
+      )}
+
+      {step === 3 && (
+        <>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 재설정</h2>
+          <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>새로운 비밀번호를 입력해주세요</p>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>새 비밀번호</label>
+            <input style={S.formInput} type="password" placeholder="8자 이상 입력" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <p style={{ fontSize: 11, color: newPassword && !validatePassword(newPassword) ? C.red : C.textLight, marginTop: 5 }}>
+              {newPassword && !validatePassword(newPassword) ? "⚠ 영문, 숫자, 특수문자를 모두 포함해야 합니다" : "영문, 숫자, 특수문자 포함 8자 이상"}
+            </p>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={S.label}>비밀번호 확인</label>
+            <input style={S.formInput} type="password" placeholder="비밀번호 재입력" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          </div>
+          <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handlePasswordReset}>비밀번호 재설정</button>
+          <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+            <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={() => setStep(2)}>이전 단계로</span>
+          </div>
+        </>
+      )}
+    </AuthLayout>
+  );
+}
+
 // ── App Shell ──
 function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen, setSidebarOpen }) {
   const [dd, setDd] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('profileImage');
+    if (saved) setProfileImage(saved);
+
+    // localStorage 변경 감지 (다른 탭)
+    const handleStorageChange = () => {
+      const updated = localStorage.getItem('profileImage');
+      if (updated) setProfileImage(updated);
+    };
+
+    // 같은 탭에서의 변경 감지
+    const handleProfileImageUpdated = (e) => {
+      setProfileImage(e.detail);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('profileImageUpdated', handleProfileImageUpdated);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('profileImageUpdated', handleProfileImageUpdated);
+    };
+  }, []);
   const notificationsRaw = [
     { id: 0, type: "highlight", title: "공지사항", message: "2026-03-19 기능 업데이트 사항", time: "방금", pinned: true },
     { id: 1, type: "highlight", title: "졸업예비심사 신청", message: "3월 22일이 마감입니다", time: "3시간 전", pinned: true },
@@ -227,7 +475,13 @@ function Header({ isLoggedIn, onLogout, onLogin, onSignup, onNavTo, sidebarOpen,
           </div>
           <div style={{ position: "relative" }} onClick={e => { e.stopPropagation(); setDd(p => !p); setNotifOpen(false); }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "4px 10px 4px 4px", borderRadius: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 13, fontWeight: 700 }}>이</div>
+              <div style={{ width: 32, height: 32, borderRadius: "50%", background: profileImage ? "white" : `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 13, fontWeight: 700, overflow: "hidden" }}>
+                {profileImage ? (
+                  <img src={profileImage} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                ) : (
+                  "이"
+                )}
+              </div>
               <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>이가윤</span>
               <span style={{ fontSize: 11, color: C.textLight }}>▾</span>
             </div>
@@ -258,7 +512,7 @@ function Sidebar({ currentSub, onNavTo, sidebarOpen }) {
   );
   const isDocsSub = ["sub-schedule","sub-ongoing","sub-expired"].includes(currentSub);
   return (
-    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto", transform: sidebarOpen ? "translateX(0)" : "translateX(-200px)", transition: "transform 0.3s ease", visibility: sidebarOpen ? "visible" : "hidden" }}>
+    <aside style={{ width: 200, flexShrink: 0, background: C.white, borderRight: `1px solid ${C.purpleBorder}`, position: "fixed", top: 58, bottom: 0, padding: "20px 12px", overflowY: "auto", transform: sidebarOpen ? "translateX(0)" : "translateX(-200px)", opacity: sidebarOpen ? 1 : 0, transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)", pointerEvents: sidebarOpen ? "auto" : "none" }}>
       {navItem("sub-home", "🏠", "대시보드", currentSub === "sub-home")}
       {navItem("sub-upload", "📎", "문서 업로드", currentSub === "sub-upload")}
       <div onClick={() => setSubOpen(p => !p)} style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, fontSize: 13, fontWeight: 500, color: isDocsSub ? C.purple : C.textMid, cursor: "pointer", marginBottom: 2 }}>
@@ -407,6 +661,7 @@ function Dashboard({ onNavTo }) {
           <div style={{ fontSize: 14, fontWeight: 700 }}>최근 분석된 문서</div>
           <div style={{ display: "flex", gap: 8, position: "relative" }}>
             <input style={{ padding: "7px 12px", border: "1.5px solid #E8E4F4", borderRadius: 8, fontSize: 12, outline: "none", fontFamily: "inherit", width: 160 }} placeholder="문서명 검색" />
+            <button style={{ ...S.btnPrimary, fontSize: 12, padding: "7px 14px" }}>검색</button>
             <button onClick={() => setShowDocFilter(!showDocFilter)} style={{ ...S.btnOutline, fontSize: 12, padding: "7px 14px" }}>필터</button>
             {showDocFilter && (
               <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "white", borderRadius: 12, padding: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", zIndex: 20, minWidth: 240 }}>
@@ -500,11 +755,11 @@ function UploadPage({ onNavTo }) {
   const [checkedFiles, setCheckedFiles] = useState({});
   const fileInputRef = useRef(null);
   const recentFiles = [
-    { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false },
-    { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true },
-    { id: 3, icon: "🖼️", name: "졸업예비심사_공지.jpg", date: "2026.02.10", done: true },
-    { id: 4, icon: "📄", name: "복지장학금_안내문.pdf", date: "2026.01.22", done: true },
-    { id: 5, icon: "📝", name: "휴학신청_양식.docx", date: "2026.01.08", done: true },
+    { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false, scheduleTitle: "국가장학금 신청" },
+    { id: 2, icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", done: true, scheduleTitle: "근로장학금 신청" },
+    { id: 3, icon: "🖼️", name: "졸업예비심사_공지.jpg", date: "2026.02.10", done: true, scheduleTitle: "졸업예비심사 신청" },
+    { id: 4, icon: "📄", name: "복지장학금_안내문.pdf", date: "2026.01.22", done: true, scheduleTitle: null },
+    { id: 5, icon: "📝", name: "휴학신청_양식.docx", date: "2026.01.08", done: true, scheduleTitle: null },
   ];
   const addFiles = (files) => {
     const newItems = [...files].map(f => ({ name: f.name, size: f.size > 1048576 ? (f.size/1048576).toFixed(1)+"MB" : (f.size/1024).toFixed(0)+"KB", progress: 0, id: Date.now() + f.name }));
@@ -586,7 +841,7 @@ function UploadPage({ onNavTo }) {
           <div style={{ padding: "16px 18px", borderBottom: `1px solid ${C.purpleBorder}`, fontSize: 13, fontWeight: 700 }}>📋 분석 완료 파일</div>
           <div style={{ padding: 8, maxHeight: 520, overflowY: "auto" }}>
             {recentFiles.map(f => (
-              <div key={f.id} onClick={() => onNavTo("doc-analysis", f.id)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px", borderRadius: 9, cursor: "pointer", marginBottom: 2, transition: "all 0.2s", background: "transparent", hover: { background: C.purpleBg } }}>
+              <div key={f.id} onClick={() => f.scheduleTitle && onNavTo("schedule-detail", f.scheduleTitle)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px", borderRadius: 9, cursor: f.scheduleTitle ? "pointer" : "default", marginBottom: 2, transition: "all 0.2s", background: "transparent", opacity: f.scheduleTitle ? 1 : 0.5, hover: f.scheduleTitle ? { background: C.purpleBg } : {} }}>
                 <span style={{ fontSize: 20 }}>{f.icon}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{f.name}</div>
@@ -673,12 +928,12 @@ function SchedulePage({ onNavTo }) {
             const sp = special[d];
             const isOther = (i < 6 && d > 20) || (i > 28 && d < 5);
             const eventTitles = { 17: "국가장학금", 22: "졸업예비심사", 27: "근로장학금" };
-            const bgColorMap = { incomplete: C.purpleBg, ongoing: "#FFF7ED", completed: C.greenBg };
-            const colorMap = { incomplete: C.purple, ongoing: "#EA580C", completed: C.green };
+            const bgColorMap = { incomplete: "#F5F5F5", ongoing: "#FFF7ED", completed: C.greenBg };
+            const colorMap = { incomplete: "#999", ongoing: "#EA580C", completed: C.green, today: "#0066CC" };
             return (
               <div key={i} onClick={() => sp && sp !== "today" && onNavTo('schedule-detail', d)} style={{ minHeight: 90, display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-start", fontSize: 13, borderRadius: 8, cursor: sp && sp !== "today" ? "pointer" : "default", padding: 8,
-                color: isOther ? "#CCC" : sp === "today" ? "white" : colorMap[sp] || C.textMid,
-                background: sp === "today" ? C.purple : bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: (sp && sp !== "today") ? 1 : 0.8, transform: "none" }}
+                color: isOther ? "#CCC" : sp === "today" ? "#0066CC" : colorMap[sp] || C.textMid,
+                background: bgColorMap[sp] || "transparent", fontWeight: sp ? 700 : 400, position: "relative", transition: "all 0.2s", opacity: (sp && sp !== "today") ? 1 : 0.8, transform: "none" }}
                 onMouseEnter={(e) => { if (sp && sp !== "today") { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; }}}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
                 <span style={{ fontSize: 12, fontWeight: 700 }}>{d}</span>
@@ -702,7 +957,7 @@ function SchedulePage({ onNavTo }) {
             <span style={{ color: C.textLight }}>완료</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-            <div style={{ width: 12, height: 12, borderRadius: 2, background: C.purple }}></div>
+            <div style={{ width: 12, height: 12, borderRadius: 2, background: "#999" }}></div>
             <span style={{ color: C.textLight }}>미완료</span>
           </div>
         </div>
@@ -748,24 +1003,15 @@ function OngoingPage({ onNavTo }) {
       checks:[{l:"졸업논문 계획서 초안 작성"},{l:"지도교수 확인서 수령"},{l:"학교 포털 심사 신청"}], total:3 },
   ];
 
-  const [checkStates, setCheckStates] = useState(
-    Object.fromEntries(docsInitial.map(doc => {
-      const initialChecks = Array(doc.total).fill(false);
-      // 국가장학금 신청: 처음 2개 기본 선택
-      if (doc.title === "국가장학금 신청") {
-        initialChecks[0] = true;
-        initialChecks[1] = true;
-      }
-      return [doc.title, initialChecks];
-    }))
-  );
-
-  const toggleCheck = (docTitle, idx) => {
-    setCheckStates(prev => ({
-      ...prev,
-      [docTitle]: prev[docTitle].map((val, i) => i === idx ? !val : val)
-    }));
-  };
+  const checkStates = Object.fromEntries(docsInitial.map(doc => {
+    const initialChecks = Array(doc.total).fill(false);
+    // 국가장학금 신청: 처음 2개 기본 선택
+    if (doc.title === "국가장학금 신청") {
+      initialChecks[0] = true;
+      initialChecks[1] = true;
+    }
+    return [doc.title, initialChecks];
+  }));
 
   return (
     <div>
@@ -777,18 +1023,21 @@ function OngoingPage({ onNavTo }) {
           const percentage = (doneCount / doc.total) * 100;
 
           return (
-            <div key={doc.title} style={S.card}>
+            <div key={doc.title} onClick={() => onNavTo("schedule-detail", doc.title)} style={{ ...S.card, cursor: "pointer" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                <div onClick={() => onNavTo("schedule-detail", doc.scheduleDay)} style={{ cursor: "pointer", flex: 1 }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.purple, textDecoration: "underline" }}>{doc.title}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.text }}>{doc.title}</div>
                   <div style={{ fontSize: 12, color: C.textLight }}>📎 업로드: {doc.upload} · 분석 완료</div>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, padding: "4px 12px", borderRadius: 20, background: doc.db, color: doc.dc }}>마감 {doc.deadline}</span>
+                  <span style={{ fontSize: 20, color: C.textLight, fontWeight: 300 }}>›</span>
+                </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 7, marginTop: 12 }}>
                 {doc.checks.map((c, idx) => (
                   <div key={c.l} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13, color: C.textMid }}>
-                    <input type="checkbox" checked={checked[idx]} onChange={() => toggleCheck(doc.title, idx)} style={{ accentColor: C.purple, width: 15, height: 15, cursor: "pointer" }} />
+                    <input type="checkbox" checked={checked[idx]} disabled style={{ accentColor: C.purple, width: 15, height: 15, cursor: "not-allowed", opacity: 0.6 }} />
                     <span>{c.l}</span>
                   </div>
                 ))}
@@ -911,14 +1160,15 @@ function ExpiredPage({ onNavTo }) {
   );
 }
 
-function ScheduleDetailPage({ day, prevSub, onNavTo }) {
+function ScheduleDetailPage({ day, title, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
+  const { toast } = useToast();
 
   // 로드
   useEffect(() => {
-    if (day) {
-      const key = `scheduleDetail_${day}`;
+    if (day || title) {
+      const key = `scheduleDetail_${title || day}`;
       const saved = localStorage.getItem(key);
       console.log("로드:", key, saved);
       if (saved) {
@@ -931,28 +1181,41 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
         }
       }
     }
-  }, [day]);
+  }, [day, title]);
 
   // 자동 저장
   useEffect(() => {
-    if (day) {
-      const key = `scheduleDetail_${day}`;
+    if (day || title) {
+      const key = `scheduleDetail_${title || day}`;
       const data = JSON.stringify({ memo, checks });
       localStorage.setItem(key, data);
       console.log("저장:", key, data);
     }
-  }, [memo, checks, day]);
+  }, [memo, checks, day, title]);
+
+  const scheduleDataByTitle = {
+    "국가장학금 신청": { title: "국가장학금 신청", deadline: "2026-03-22 17:00", dday: "D-3", summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.", documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"], color: "#A91E2E", bg: "#FFE5E5" },
+    "졸업예비심사 신청": { title: "졸업예비심사 신청", deadline: "2026-03-22 18:00", dday: "D-8", summary: "졸업 자격 심사를 위한 졸업예비심사 신청입니다. 졸업논문 계획서와 지도교수 확인서가 필수입니다.", documents: ["졸업논문 계획서", "지도교수 확인서", "학교 포털 심사 신청"], color: "#EA580C", bg: "#FFF7ED" },
+    "근로장학금 신청": { title: "근로장학금 신청", deadline: "2026-03-27 23:59", dday: "D-8", summary: "학교 근로 장학금 신청입니다. 근로시간 증명서와 통장 사본이 필요합니다.", documents: ["재학증명서", "통장 사본", "신원증 사본"], color: C.green, bg: "#F0FDF4" }
+  };
 
   const scheduleData = {
     22: { title: "국가장학금 신청", deadline: "2026-03-22 17:00", dday: "D-3", summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.", documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"], color: "#A91E2E", bg: "#FFE5E5" },
     27: { title: "근로장학금 신청", deadline: "2026-03-27 23:59", dday: "D-8", summary: "학교 근로 장학금 신청입니다. 근로시간 증명서와 통장 사본이 필요합니다.", documents: ["재학증명서", "통장 사본", "신원증 사본"], color: C.green, bg: "#F0FDF4" }
   };
 
-  const data = scheduleData[day];
+  const data = title ? scheduleDataByTitle[title] : scheduleData[day];
   if (!data) return <div>일정을 찾을 수 없습니다</div>;
 
   const toggleCheck = (idx) => {
     setChecks(p => ({ ...p, [idx]: !p[idx] }));
+  };
+
+  const handleSave = () => {
+    const key = `scheduleDetail_${day}`;
+    const data = JSON.stringify({ memo, checks });
+    localStorage.setItem(key, data);
+    alert("저장되었습니다!");
   };
 
   const completedCount = Object.values(checks).filter(Boolean).length;
@@ -981,7 +1244,10 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
 
         {/* 오른쪽: 필요 서류 */}
         <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📄 필요 서류</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
+            <button onClick={handleSave} style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
@@ -998,7 +1264,10 @@ function ScheduleDetailPage({ day, prevSub, onNavTo }) {
 
       {/* 메모 */}
       <div style={{ ...S.card, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📝 메모</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>📝 메모</div>
+          <button onClick={handleSave} style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+        </div>
         <textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
@@ -1132,105 +1401,10 @@ function NotificationAnalysisPage({ onNavTo }) {
   );
 }
 
-function DocumentAnalysisPage({ fileId, onNavTo }) {
-  const fileAnalysisMap = {
-    1: { icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", analyzed: "2026.03.19 14:23", done: false, items: [
-      { item: "소득분위 확인서", status: "완료", icon: "✅" },
-      { item: "가족관계증명서", status: "미제출", icon: "❌" },
-      { item: "재학증명서", status: "미제출", icon: "❌" },
-      { item: "주민등록등본", status: "완료", icon: "✅" },
-      { item: "신청서 작성", status: "완료", icon: "✅" }
-    ]},
-    2: { icon: "📄", name: "근로장학금_신청서.pdf", date: "2026.02.28", analyzed: "2026.03.10 10:15", done: true, items: [
-      { item: "신청서 작성", status: "완료", icon: "✅" },
-      { item: "통장 사본", status: "완료", icon: "✅" },
-      { item: "신원증 사본", status: "완료", icon: "✅" }
-    ]},
-    3: { icon: "🖼️", name: "졸업예비심사_공지.jpg", date: "2026.02.10", analyzed: "2026.02.28 09:45", done: true, items: [
-      { item: "졸업논문 계획서", status: "완료", icon: "✅" },
-      { item: "지도교수 확인서", status: "완료", icon: "✅" },
-      { item: "학적 기록부", status: "완료", icon: "✅" }
-    ]},
-    4: { icon: "📄", name: "복지장학금_안내문.pdf", date: "2026.01.22", analyzed: "2026.02.10 16:20", done: true, items: [
-      { item: "가계소득 증명서", status: "완료", icon: "✅" },
-      { item: "부채 증명서", status: "완료", icon: "✅" }
-    ]},
-    5: { icon: "📝", name: "휴학신청_양식.docx", date: "2026.01.08", analyzed: "2026.01.15 11:30", done: true, items: [
-      { item: "휴학 신청서", status: "완료", icon: "✅" },
-      { item: "학생증 사본", status: "완료", icon: "✅" }
-    ]}
-  };
-
-  const file = fileAnalysisMap[fileId];
-  if (!file) return <div>파일을 찾을 수 없습니다</div>;
-
-  const completedCount = file.items.filter(i => i.status === "완료").length;
-
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <div>
-          <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>📄 {file.name}</div>
-          <div style={{ fontSize: 14, color: C.textLight }}>문서 분석 결과</div>
-        </div>
-        <button onClick={() => onNavTo('sub-upload')} style={{ ...S.btnOutline, fontSize: 12 }}>← 돌아가기</button>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
-        <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>📄 문서 정보</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 12 }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 600, marginBottom: 4 }}>파일명</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{file.name}</div>
-            </div>
-            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 12 }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 600, marginBottom: 4 }}>업로드 날짜</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{file.date}</div>
-            </div>
-            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 12 }}>
-              <div style={{ fontSize: 11, color: C.purple, fontWeight: 600, marginBottom: 4 }}>분석 완료</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{file.analyzed}</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>🎯 분석 결과</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ padding: 12, background: C.greenBg, borderRadius: 8, borderLeft: `3px solid ${C.green}` }}>
-              <div style={{ fontSize: 12, color: C.green, fontWeight: 600, marginBottom: 4 }}>완료율</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.text }}>{completedCount} / {file.items.length} · {Math.round(completedCount/file.items.length*100)}%</div>
-            </div>
-            <div style={{ padding: 12, background: file.done ? C.greenBg : C.redBg, borderRadius: 8, borderLeft: `3px solid ${file.done ? C.green : C.red}` }}>
-              <div style={{ fontSize: 12, color: file.done ? C.green : C.red, fontWeight: 600, marginBottom: 4 }}>상태</div>
-              <div style={{ fontSize: 12, color: C.textMid }}>{file.done ? "분석 완료" : "분석 진행 중"}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ ...S.card }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📋 상세 분석</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {file.items.map((item, idx) => (
-            <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", background: C.purpleBg, borderRadius: 8, borderLeft: `3px solid ${C.purple}`, fontSize: 13 }}>
-              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 16 }}>✅</span>
-                <span style={{ color: C.text, fontWeight: 500 }}>{item.item}</span>
-              </span>
-              <span style={{ color: C.purple, fontWeight: 600, fontSize: 12 }}>필요</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DocumentDetailPage({ data, prevSub, onNavTo }) {
   const [memo, setMemo] = useState("");
   const [checks, setChecks] = useState({});
+  const { toast } = useToast();
 
   // 로드
   useEffect(() => {
@@ -1273,6 +1447,13 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
   const completedCount = Object.values(checks).filter(Boolean).length;
   const statusColor = completedCount === data.total ? C.green : completedCount > 0 ? "#EA580C" : C.red;
 
+  const handleSave = () => {
+    const key = `documentDetail_${data.title}`;
+    const saveData = JSON.stringify({ memo, checks });
+    localStorage.setItem(key, saveData);
+    alert("저장되었습니다!");
+  };
+
   return (
     <div>
       {/* 헤더 */}
@@ -1298,7 +1479,10 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
 
         {/* 오른쪽: 필요 서류 */}
         <div style={{ ...S.card }}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📄 필요 서류</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>📄 필요 서류</div>
+            <button onClick={handleSave} style={{ background: C.purple, color: "white", border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>저장하기</button>
+          </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {data.documents.map((doc, idx) => (
               <label key={idx} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13 }}>
@@ -1315,7 +1499,10 @@ function DocumentDetailPage({ data, prevSub, onNavTo }) {
 
       {/* 메모 */}
       <div style={{ ...S.card, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>📝 메모</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ fontSize: 14, fontWeight: 700 }}>📝 메모</div>
+          <button onClick={handleSave} style={{ ...S.btnPrimary, fontSize: 12, padding: "6px 12px" }}>저장하기</button>
+        </div>
         <textarea
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
@@ -1351,12 +1538,184 @@ function Toggle({ defaultOn = false }) {
 
 function ProfilePage() {
   const [settingsTab, setSettingsTab] = useState("profile");
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [tempImage, setTempImage] = useState(null);
+  const [showImageEditor, setShowImageEditor] = useState(false);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [imageScale, setImageScale] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const fileInputRef = useRef(null);
   const tabs = [["profile","👤 프로필"],["notifications","🔔 알림 설정"],["security","🔒 보안"],["calendar","📅 캘린더 연동"]];
 
   const handleSave = () => {
+    setShowSaveConfirm(true);
+  };
+
+  const handleSaveConfirm = () => {
+    setShowSaveConfirm(false);
     setShowSaveSuccess(true);
     setTimeout(() => setShowSaveSuccess(false), 2000);
+  };
+
+  const handleSaveCancel = () => {
+    setShowSaveConfirm(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file && ["image/png", "image/jpeg"].includes(file.type)) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setTempImage(event.target?.result);
+        setShowImageEditor(true);
+        setImagePosition({ x: 0, y: 0 });
+        setImageScale(1);
+      };
+      reader.readAsDataURL(file);
+    }
+    // 같은 파일을 다시 선택할 수 있도록 input 초기화
+    e.target.value = '';
+  };
+
+  const handleImageConfirm = () => {
+    // Canvas로 원형 이미지 생성 (미리보기와 동일한 계산)
+    try {
+      const editorSize = 380;
+      const previewSize = 140;
+
+      // 이미지 로드
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+
+      img.onload = function() {
+        try {
+          const scaledWidth = img.width * imageScale;
+          const scaledHeight = img.height * imageScale;
+          const editSize = 400; // 모달의 편집 영역 크기
+          const centerX = editSize / 2;
+          const centerY = editSize / 2;
+
+          // 1단계: 임시 Canvas를 편집 영역 크기로 생성
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = editSize;
+          tempCanvas.height = editSize;
+          const tempCtx = tempCanvas.getContext('2d');
+          if (!tempCtx) throw new Error('Canvas context 실패');
+
+          // 배경 흰색
+          tempCtx.fillStyle = 'white';
+          tempCtx.fillRect(0, 0, editSize, editSize);
+
+          // 2단계: 편집 화면과 동일하게 이미지 배치 (원본 비율 유지)
+          // 편집 화면: width: 100% * imageScale = 400 * imageScale, height: auto
+          const displayWidth = 400 * imageScale;
+          const displayHeight = displayWidth * (img.height / img.width); // 원본 비율 유지
+
+          tempCtx.drawImage(
+            img,
+            centerX + imagePosition.x - displayWidth / 2,
+            centerY + imagePosition.y - displayHeight / 2,
+            displayWidth,
+            displayHeight
+          );
+
+          // 3단계: 최종 Canvas 생성 (140x140 원형)
+          const finalCanvas = document.createElement('canvas');
+          finalCanvas.width = previewSize;
+          finalCanvas.height = previewSize;
+          const finalCtx = finalCanvas.getContext('2d');
+
+          // 4단계: 원형 마스크 생성
+          finalCtx.beginPath();
+          finalCtx.arc(previewSize / 2, previewSize / 2, previewSize / 2, 0, Math.PI * 2);
+          finalCtx.clip();
+
+          // 5단계: 배경 흰색
+          finalCtx.fillStyle = 'white';
+          finalCtx.fillRect(0, 0, previewSize, previewSize);
+
+          // 6단계: 임시 Canvas의 원형 가이드 부분을 최종 Canvas로 복사
+          // 편집 화면의 원형 프레임과 정확히 일치하도록
+          const frameSize = 200; // 편집 화면의 원형 프레임 크기
+          const frameStartX = (editSize - frameSize) / 2; // (400 - 200) / 2 = 100
+          const frameStartY = (editSize - frameSize) / 2; // 100
+
+          finalCtx.drawImage(
+            tempCanvas,
+            frameStartX,
+            frameStartY,
+            frameSize,
+            frameSize,
+            0,
+            0,
+            previewSize,
+            previewSize
+          );
+
+          const result = finalCanvas.toDataURL('image/png');
+          setProfileImage(result);
+          localStorage.setItem('profileImage', result);
+          // Header 업데이트를 위한 custom 이벤트 발생
+          window.dispatchEvent(new CustomEvent('profileImageUpdated', { detail: result }));
+          setShowImageEditor(false);
+          setTempImage(null);
+        } catch (e) {
+          console.error('이미지 그리기 실패:', e);
+          setProfileImage(tempImage);
+          setShowImageEditor(false);
+          setTempImage(null);
+        }
+      };
+
+      img.onerror = function() {
+        console.error('이미지 로드 실패');
+        setProfileImage(tempImage);
+        setShowImageEditor(false);
+        setTempImage(null);
+      };
+
+      img.src = tempImage;
+    } catch (e) {
+      console.error('Canvas 오류:', e);
+      setProfileImage(tempImage);
+      setShowImageEditor(false);
+      setTempImage(null);
+    }
+  };
+
+  const handleImageCancel = () => {
+    setShowImageEditor(false);
+    setTempImage(null);
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    dragStartRef.current = { x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y };
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    let newX = e.clientX - dragStartRef.current.x;
+    let newY = e.clientY - dragStartRef.current.y;
+
+    // 이미지 자유로운 이동 (중앙 기준)
+    // 사용자가 충분히 조정할 수 있도록 여유 있는 범위 설정
+    const minOffsetX = -300;
+    const maxOffsetX = 300;
+    const minOffsetY = -300;
+    const maxOffsetY = 300;
+
+    newX = Math.max(minOffsetX, Math.min(maxOffsetX, newX));
+    newY = Math.max(minOffsetY, Math.min(maxOffsetY, newY));
+
+    setImagePosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   return (
@@ -1375,14 +1734,42 @@ function ProfilePage() {
           {settingsTab === "profile" && (
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24 }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: `linear-gradient(135deg,${C.purple},${C.purpleLight})`, display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 26, fontWeight: 700 }}>이</div>
+                <div style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: "50%",
+                  background: profileImage ? "white" : `linear-gradient(135deg,${C.purple},${C.purpleLight})`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "white",
+                  fontSize: 26,
+                  fontWeight: 700,
+                  overflow: "hidden",
+                  position: "relative"
+                }}>
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        borderRadius: "50%"
+                      }}
+                    />
+                  ) : (
+                    "이"
+                  )}
+                </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>이가윤</div>
                   <div style={{ fontSize: 12, color: C.textLight, marginBottom: 10 }}>컴퓨터소프트웨어과</div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: C.purpleBg, color: C.purple, border: "none", fontFamily: "inherit" }}>사진 변경</button>
-                    <button style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: "#F5F5F5", color: C.textMid, border: "none", fontFamily: "inherit" }}>삭제</button>
+                    <button onClick={() => fileInputRef.current?.click()} style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: C.purpleBg, color: C.purple, border: "none", fontFamily: "inherit" }}>사진 변경</button>
+                    <button onClick={() => setProfileImage(null)} style={{ padding: "7px 14px", fontSize: 12, borderRadius: 8, fontWeight: 600, cursor: "pointer", background: "#F5F5F5", color: C.textMid, border: "none", fontFamily: "inherit" }}>삭제</button>
                   </div>
+                  <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" onChange={handleImageChange} style={{ display: "none" }} />
                 </div>
               </div>
               <hr style={{ border: "none", borderTop: `1px solid ${C.purpleBorder}`, margin: "0 0 24px" }} />
@@ -1447,6 +1834,100 @@ function ProfilePage() {
         </div>
       </div>
 
+      {/* 사진 편집 모달 - 인스타그램 스타일 */}
+      {showImageEditor && tempImage && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "#000", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 1001 }} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+          {/* 헤더 */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", background: "rgba(0,0,0,0.7)", color: "white" }}>
+            <button onClick={handleImageCancel} style={{ background: "none", border: "none", color: "white", fontSize: 16, cursor: "pointer", fontFamily: "inherit" }}>취소</button>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>프로필 사진 편집</div>
+            <button onClick={handleImageConfirm} style={{ background: "none", border: "none", color: C.purple, fontSize: 16, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>완료</button>
+          </div>
+
+          {/* 편집 영역 */}
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", marginTop: 60, marginBottom: 120 }}>
+            <div
+              style={{
+                position: "relative",
+                width: 400,
+                height: 400,
+                overflow: "hidden",
+                background: "#1a1a1a",
+                cursor: isDragging ? "grabbing" : "grab"
+              }}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {/* 이미지 */}
+              <img
+                src={tempImage}
+                draggable={false}
+                onMouseDown={handleMouseDown}
+                style={{
+                  width: `${100 * imageScale}%`,
+                  height: "auto",
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: `translate(calc(-50% + ${imagePosition.x}px), calc(-50% + ${imagePosition.y}px))`,
+                  cursor: isDragging ? "grabbing" : "grab",
+                  userSelect: "none"
+                }}
+              />
+
+              {/* 원형 가이드 (중앙) */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 200,
+                  height: 200,
+                  borderRadius: "50%",
+                  border: `3px solid ${C.purple}`,
+                  pointerEvents: "none",
+                  boxShadow: "0 0 0 9999px rgba(0,0,0,0.4)"
+                }}
+              />
+            </div>
+          </div>
+
+          {/* 슬라이더 */}
+          <div style={{ position: "absolute", bottom: 100, width: "80%", maxWidth: 400, padding: "0 20px", color: "white" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <span style={{ fontSize: 12 }}>-</span>
+              <input
+                type="range"
+                min="0.5"
+                max="2"
+                step="0.1"
+                value={imageScale}
+                onChange={(e) => setImageScale(parseFloat(e.target.value))}
+                style={{ flex: 1, cursor: "pointer" }}
+              />
+              <span style={{ fontSize: 12 }}>+</span>
+              <span style={{ fontSize: 12, minWidth: 30, textAlign: "right" }}>{Math.round(imageScale * 100)}%</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 저장 확인 팝업 */}
+      {showSaveConfirm && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 28, textAlign: "center", maxWidth: 320, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>저장하시겠습니까?</div>
+            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24 }}>변경사항을 저장합니다.</div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button onClick={handleSaveCancel} style={{ ...S.btnOutline, fontSize: 13 }}>취소</button>
+              <button onClick={handleSaveConfirm} style={{ ...S.btnPrimary, fontSize: 13 }}>확인</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 저장 완료 팝업 */}
       {showSaveSuccess && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
@@ -1467,35 +1948,37 @@ export default function App() {
   const [sub, setSub] = useState(params.get("sub") || "sub-home");
   const [prevSub, setPrevSub] = useState("sub-home");
   const [scheduleDetailDay, setScheduleDetailDay] = useState(null);
+  const [scheduleDetailTitle, setScheduleDetailTitle] = useState(null);
   const [docDetailData, setDocDetailData] = useState(null);
-  const [docAnalysisId, setDocAnalysisId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { msg, show, toast } = useToast();
 
-  const titleMap = { "sub-home":"대시보드","sub-upload":"문서 업로드","sub-schedule":"일정 관리","sub-ongoing":"진행 중인 문서","sub-expired":"마감된 문서","sub-profile":"내 정보", "schedule-detail":"일정 상세", "doc-detail":"문서 상세", "notif-announcement":"공지사항", "notif-analysis":"문서 분석 결과", "doc-analysis":"문서 분석 결과" };
+  const titleMap = { "sub-home":"대시보드","sub-upload":"문서 업로드","sub-schedule":"일정 관리","sub-ongoing":"진행 중인 문서","sub-expired":"마감된 문서","sub-profile":"내 정보", "schedule-detail":"일정 상세", "doc-detail":"문서 상세", "notif-announcement":"공지사항", "notif-analysis":"문서 분석 결과" };
 
   const handleLogin = (m) => { setPage("app"); setSub("sub-home"); toast(m); };
   const handleLogout = () => { setPage("login"); toast("로그아웃됐어요"); };
-  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) setScheduleDetailDay(detailDay); if(data) setDocDetailData(data); if(typeof detailDay === 'number' && s === 'doc-analysis') setDocAnalysisId(detailDay); };
+  const navTo = (s, detailDay, data) => { if(s === "schedule-detail" || s === "doc-detail") setPrevSub(sub); setSub(s); if(detailDay) { if(typeof detailDay === 'number') setScheduleDetailDay(detailDay); else setScheduleDetailTitle(detailDay); } if(data) setDocDetailData(data); };
 
   // 히스토리 관리
   useEffect(() => {
-    window.history.pushState({ sub, scheduleDetailDay, docDetailData }, null, '');
+    window.history.pushState({ sub, scheduleDetailDay, scheduleDetailTitle, docDetailData }, null, '');
 
     const handlePopState = (e) => {
       if (e.state) {
         setSub(e.state.sub || "sub-home");
         if (e.state.scheduleDetailDay) setScheduleDetailDay(e.state.scheduleDetailDay);
+        if (e.state.scheduleDetailTitle) setScheduleDetailTitle(e.state.scheduleDetailTitle);
         if (e.state.docDetailData) setDocDetailData(e.state.docDetailData);
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [sub, scheduleDetailDay, docDetailData]);
+  }, [sub, scheduleDetailDay, scheduleDetailTitle, docDetailData]);
 
-  if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
-  if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} toast={toast} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} goForgotPassword={() => setPage("forgot-password")} toast={toast} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "forgot-password") return <><ForgotPasswordPage toast={toast} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Noto Sans KR', sans-serif" }}>
@@ -1503,18 +1986,17 @@ export default function App() {
       <Header isLoggedIn={true} onLogout={handleLogout} onLogin={() => setPage("login")} onSignup={() => setPage("signup")} onNavTo={navTo} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div style={{ display: "flex", paddingTop: 58, minHeight: "calc(100vh - 58px)", minWidth: "1200px" }}>
         <Sidebar currentSub={sub} onNavTo={navTo} sidebarOpen={sidebarOpen} />
-        <main style={{ marginLeft: sidebarOpen ? 200 : 0, flex: 1, padding: "28px 28px 40px 48px", transition: "marginLeft 0.3s ease" }}>
+        <main style={{ marginLeft: sidebarOpen ? 200 : 0, flex: 1, padding: "28px 28px 40px 48px", transition: "marginLeft 0.35s cubic-bezier(0.4, 0, 0.2, 1)" }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.textLight, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>{titleMap[sub]}</div>
           {sub === "sub-home" && <Dashboard onNavTo={navTo} />}
           {sub === "sub-upload" && <UploadPage onNavTo={navTo} />}
           {sub === "sub-schedule" && <SchedulePage onNavTo={navTo} />}
-          {sub === "schedule-detail" && <ScheduleDetailPage day={scheduleDetailDay} prevSub={prevSub} onNavTo={navTo} />}
+          {sub === "schedule-detail" && <ScheduleDetailPage day={scheduleDetailDay} title={scheduleDetailTitle} prevSub={prevSub} onNavTo={navTo} />}
           {sub === "sub-ongoing" && <OngoingPage onNavTo={navTo} />}
           {sub === "sub-expired" && <ExpiredPage onNavTo={navTo} />}
           {sub === "doc-detail" && <DocumentDetailPage data={docDetailData} prevSub={prevSub} onNavTo={navTo} />}
           {sub === "notif-announcement" && <NotificationAnnouncementPage onNavTo={navTo} />}
           {sub === "notif-analysis" && <NotificationAnalysisPage onNavTo={navTo} />}
-          {sub === "doc-analysis" && <DocumentAnalysisPage fileId={docAnalysisId} onNavTo={navTo} />}
           {sub === "sub-profile" && <ProfilePage />}
         </main>
       </div>

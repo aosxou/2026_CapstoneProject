@@ -176,7 +176,7 @@ function SignupPage({ onLogin, goLogin, toast }) {
         <label style={S.label}>이메일</label>
         <div style={{ display: "flex", gap: 8 }}>
           <input style={{ ...S.formInput, flex: 1 }} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }} onClick={() => { if (!email) { toast("이메일을 입력해주세요"); } else { toast("인증번호를 이메일로 전송했어요 📩"); } }}>인증번호 보내기</button>
+          <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }} onClick={() => { if (!email) { toast("이메일을 입력해주세요"); } else if (!validateEmail(email)) { toast("이메일 형식이 올바르지 않습니다"); } else { toast("인증번호를 이메일로 전송했어요 📩"); } }}>인증번호 보내기</button>
         </div>
         {email && !validateEmail(email) && <p style={{ fontSize: 11, color: C.red, marginTop: 5 }}>⚠ 이메일 형식이 올바르지 않습니다</p>}
       </div>

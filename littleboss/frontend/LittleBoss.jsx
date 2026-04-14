@@ -178,6 +178,7 @@ function SignupPage({ onLogin, goLogin, toast }) {
           <input style={{ ...S.formInput, flex: 1 }} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }} onClick={() => { if (!email) { toast("이메일을 입력해주세요"); } else { toast("인증번호를 이메일로 전송했어요 📩"); } }}>인증번호 보내기</button>
         </div>
+        {email && !validateEmail(email) && <p style={{ fontSize: 11, color: C.red, marginTop: 5 }}>⚠ 이메일 형식이 올바르지 않습니다</p>}
       </div>
       <div style={{ marginBottom: 16 }}>
         <label style={S.label}>인증번호</label>
@@ -310,6 +311,7 @@ function ForgotPasswordPage({ toast, goLogin }) {
           <div style={{ marginBottom: 16 }}>
             <label style={S.label}>이메일</label>
             <input style={S.formInput} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            {email && !validateEmail(email) && <p style={{ fontSize: 11, color: C.red, marginTop: 5 }}>⚠ 이메일 형식이 올바르지 않습니다</p>}
           </div>
           <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={handleEmailSubmit}>이메일 보내기</button>
           <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>

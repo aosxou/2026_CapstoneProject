@@ -182,7 +182,7 @@ function ForgotPasswordPage({ toast, goLogin }) {
     <AuthLayout>
       {step === 1 && (
         <>
-          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 찾기</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 재설정</h2>
           <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>가입한 이메일을 입력하면 인증 코드를 보내드립니다</p>
           <div style={{ marginBottom: 16 }}>
             <label style={S.label}>이메일</label>

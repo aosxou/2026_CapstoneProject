@@ -5,10 +5,8 @@ from common.db import (
     update_document_after_analysis,
     create_checklists,
     save_document_error,
-    save_embedding,
 )
 from common.gemini import analyze_document
-from common.embeddings import generate_embedding
 from common.constants import DOCUMENT_STATUS, CHECKLIST_DEFAULT_COMPLETED
 from common.utils import generate_id, now_iso, days_until, urgency_from_days
 
@@ -64,21 +62,6 @@ def handle_analysis(doc_id: str, user_id: str) -> dict:
         })
     if checklist_items:
         create_checklists(checklist_items)
-
-    # Generate and save embedding for vector search
-    try:
-        embedding_text = f"{analysis.get('document_type', '')} {analysis.get('summary', '')} {raw_text[:1000]}"
-        embedding = generate_embedding(embedding_text)
-        save_embedding(
-            doc_id=doc_id,
-            user_id=user_id,
-            embedding=embedding,
-            document_type=analysis.get("document_type", ""),
-            summary=analysis.get("summary", ""),
-            updated_at=ts,
-        )
-    except Exception:
-        pass  # Embedding failure should not block the main flow
 
     return {
         "doc_id": doc_id,

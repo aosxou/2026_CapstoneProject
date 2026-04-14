@@ -535,6 +535,7 @@ function Dashboard({ onNavTo }) {
           <div style={{ fontSize: 14, fontWeight: 700 }}>최근 분석된 문서</div>
           <div style={{ display: "flex", gap: 8, position: "relative" }}>
             <input style={{ padding: "7px 12px", border: "1.5px solid #E8E4F4", borderRadius: 8, fontSize: 12, outline: "none", fontFamily: "inherit", width: 160 }} placeholder="문서명 검색" />
+            <button style={{ ...S.btnPrimary, fontSize: 12, padding: "7px 14px" }}>검색</button>
             <button onClick={() => setShowDocFilter(!showDocFilter)} style={{ ...S.btnOutline, fontSize: 12, padding: "7px 14px" }}>필터</button>
             {showDocFilter && (
               <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, background: "white", borderRadius: 12, padding: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.12)", zIndex: 20, minWidth: 240 }}>

@@ -29,6 +29,24 @@ const S = {
   label: { fontSize: 13, fontWeight: 600, color: C.textMid, display: "block", marginBottom: 6 },
 };
 
+// ── Password validation ──
+const validatePassword = (password) => {
+  const hasEnglish = /[a-zA-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[!@#$%^&*()_+=\-\[\]{};':"\\|,.<>\/?]/.test(password);
+  const isLongEnough = password.length >= 8;
+  return hasEnglish && hasNumber && hasSpecial && isLongEnough;
+};
+
+const getPasswordErrorMessage = (password) => {
+  if (!password) return "비밀번호를 입력해주세요";
+  if (password.length < 8) return "비밀번호는 8자 이상이어야 합니다";
+  if (!/[a-zA-Z]/.test(password)) return "영문을 포함해주세요";
+  if (!/\d/.test(password)) return "숫자를 포함해주세요";
+  if (!/[!@#$%^&*()_+=\-\[\]{};':"\\|,.<>\/?]/.test(password)) return "특수기호를 포함해주세요";
+  return null;
+};
+
 // ── Toast ──
 function useToast() {
   const [msg, setMsg] = useState("");
@@ -93,29 +111,82 @@ function FormGroup({ label, type = "text", placeholder, hint }) {
   );
 }
 
-function SignupPage({ onLogin, goLogin }) {
+function SignupPage({ onLogin, goLogin, toast }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [verifyCode, setVerifyCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
+  const handleSignup = () => {
+    if (!name) {
+      toast("이름을 입력해주세요");
+      return;
+    }
+    if (!email) {
+      toast("이메일을 입력해주세요");
+      return;
+    }
+    if (!verifyCode) {
+      toast("인증번호를 입력해주세요");
+      return;
+    }
+    const passwordError = getPasswordErrorMessage(password);
+    if (passwordError) {
+      toast(passwordError);
+      return;
+    }
+    if (!confirmPassword) {
+      toast("비밀번호 확인을 입력해주세요");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast("비밀번호가 일치하지 않습니다");
+      return;
+    }
+    if (!agreeTerms) {
+      toast("약관에 동의해주세요");
+      return;
+    }
+    onLogin("🎉 회원가입이 완료됐어요!");
+  };
+
   return (
     <AuthLayout>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>회원가입</h2>
       <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>계정을 만들고 AI 행정 비서를 시작하세요</p>
       <GoogleBtn label="Google로 계속하기" onClick={() => onLogin("Google 계정으로 가입됐어요 🎉")} />
       <DividerOr />
-      <FormGroup label="이름" placeholder="홍길동" />
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>이름</label>
+        <input style={S.formInput} type="text" placeholder="홍길동" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
       <div style={{ marginBottom: 16 }}>
         <label style={S.label}>이메일</label>
         <div style={{ display: "flex", gap: 8 }}>
-          <input style={{ ...S.formInput, flex: 1 }} type="email" placeholder="example@email.com" />
+          <input style={{ ...S.formInput, flex: 1 }} type="email" placeholder="example@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
           <button style={{ ...S.btnPrimary, padding: "12px 16px", fontSize: 13, whiteSpace: "nowrap" }}>인증번호 보내기</button>
         </div>
       </div>
-      <FormGroup label="인증번호" type="text" placeholder="인증번호 입력" />
-      <FormGroup label="비밀번호" type="password" placeholder="8자 이상 입력" hint="영문, 숫자, 특수문자 포함 8자 이상" />
-      <FormGroup label="비밀번호 확인" type="password" placeholder="비밀번호 재입력" />
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>인증번호</label>
+        <input style={S.formInput} type="text" placeholder="인증번호 입력" value={verifyCode} onChange={(e) => setVerifyCode(e.target.value)} />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>비밀번호</label>
+        <input style={S.formInput} type="password" placeholder="8자 이상 입력" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <p style={{ fontSize: 11, color: C.textLight, marginTop: 5 }}>영문, 숫자, 특수문자 포함 8자 이상</p>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={S.label}>비밀번호 확인</label>
+        <input style={S.formInput} type="password" placeholder="비밀번호 재입력" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+      </div>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 13, color: C.textMid, marginBottom: 24 }}>
-        <input type="checkbox" style={{ marginTop: 2, accentColor: C.purple }} />
+        <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} style={{ marginTop: 2, accentColor: C.purple }} />
         <label><span style={{ color: C.purple, cursor: "pointer" }}>이용약관</span> 및 <span style={{ color: C.purple, cursor: "pointer" }}>개인정보 처리방침</span>에 동의합니다.</label>
       </div>
-      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15 }} onClick={() => onLogin("🎉 회원가입이 완료됐어요!")}>가입하기</button>
+      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15 }} onClick={handleSignup}>가입하기</button>
       <div style={{ textAlign: "center", fontSize: 13, color: C.textLight, marginTop: 20 }}>
         이미 계정이 있으신가요? <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goLogin}>로그인</span>
       </div>
@@ -169,16 +240,17 @@ function ForgotPasswordPage({ toast, goLogin }) {
   };
 
   const handlePasswordReset = () => {
-    if (!newPassword || !confirmPassword) {
-      toast("비밀번호를 입력해주세요");
+    const passwordError = getPasswordErrorMessage(newPassword);
+    if (passwordError) {
+      toast(passwordError);
+      return;
+    }
+    if (!confirmPassword) {
+      toast("비밀번호 확인을 입력해주세요");
       return;
     }
     if (newPassword !== confirmPassword) {
       toast("비밀번호가 일치하지 않습니다");
-      return;
-    }
-    if (newPassword.length < 8) {
-      toast("비밀번호는 8자 이상이어야 합니다");
       return;
     }
     toast("비밀번호가 재설정되었어요 🎉");
@@ -1856,7 +1928,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [sub, scheduleDetailDay, scheduleDetailTitle, docDetailData]);
 
-  if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} toast={toast} /><ToastEl msg={msg} show={show} /></>;
   if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} goForgotPassword={() => setPage("forgot-password")} /><ToastEl msg={msg} show={show} /></>;
   if (page === "forgot-password") return <><ForgotPasswordPage toast={toast} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
 

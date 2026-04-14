@@ -116,7 +116,7 @@ function SignupPage({ onLogin, goLogin }) {
   );
 }
 
-function LoginPage({ onLogin, goSignup }) {
+function LoginPage({ onLogin, goSignup, goForgotPassword }) {
   return (
     <AuthLayout>
       <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>로그인</h2>
@@ -127,10 +127,24 @@ function LoginPage({ onLogin, goSignup }) {
       <FormGroup label="비밀번호" type="password" placeholder="비밀번호 입력" />
       <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 12 }} onClick={() => onLogin("로그인됐어요 👋")}>로그인</button>
       <div style={{ textAlign: "center", fontSize: 12, color: C.textLight, marginBottom: 4 }}>
-        <span style={{ color: C.purple, cursor: "pointer" }}>비밀번호를 잊으셨나요?</span>
+        <span style={{ color: C.purple, cursor: "pointer" }} onClick={goForgotPassword}>비밀번호를 잊으셨나요?</span>
       </div>
       <div style={{ textAlign: "center", fontSize: 13, color: C.textLight, marginTop: 16 }}>
         계정이 없으신가요? <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goSignup}>회원가입</span>
+      </div>
+    </AuthLayout>
+  );
+}
+
+function ForgotPasswordPage({ toast, goLogin }) {
+  return (
+    <AuthLayout>
+      <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 6 }}>비밀번호 찾기</h2>
+      <p style={{ fontSize: 14, color: C.textLight, marginBottom: 28 }}>가입한 이메일을 입력하면 재설정 링크를 보내드립니다</p>
+      <FormGroup label="이메일" type="email" placeholder="example@email.com" />
+      <button style={{ ...S.btnPrimary, width: "100%", justifyContent: "center", padding: 13, fontSize: 15, marginBottom: 16 }} onClick={() => { toast("이메일을 발송했어요 📩"); goLogin(); }}>이메일 보내기</button>
+      <div style={{ textAlign: "center", fontSize: 13, color: C.textLight }}>
+        <span style={{ color: C.purple, fontWeight: 600, cursor: "pointer" }} onClick={goLogin}>로그인으로 돌아가기</span>
       </div>
     </AuthLayout>
   );
@@ -1752,7 +1766,8 @@ export default function App() {
   }, [sub, scheduleDetailDay, scheduleDetailTitle, docDetailData]);
 
   if (page === "signup") return <><SignupPage onLogin={handleLogin} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
-  if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "login") return <><LoginPage onLogin={handleLogin} goSignup={() => setPage("signup")} goForgotPassword={() => setPage("forgot-password")} /><ToastEl msg={msg} show={show} /></>;
+  if (page === "forgot-password") return <><ForgotPasswordPage toast={toast} goLogin={() => setPage("login")} /><ToastEl msg={msg} show={show} /></>;
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Noto Sans KR', sans-serif" }}>

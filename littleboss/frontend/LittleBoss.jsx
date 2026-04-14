@@ -179,7 +179,9 @@ function SignupPage({ onLogin, goLogin, toast }) {
       <div style={{ marginBottom: 16 }}>
         <label style={S.label}>비밀번호</label>
         <input style={S.formInput} type="password" placeholder="8자 이상 입력" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <p style={{ fontSize: 11, color: C.textLight, marginTop: 5 }}>영문, 숫자, 특수문자 포함 8자 이상</p>
+        <p style={{ fontSize: 11, color: password && !validatePassword(password) ? C.red : C.textLight, marginTop: 5 }}>
+          {password && !validatePassword(password) ? "⚠ 영문, 숫자, 특수문자를 모두 포함해야 합니다" : "영문, 숫자, 특수문자 포함 8자 이상"}
+        </p>
       </div>
       <div style={{ marginBottom: 16 }}>
         <label style={S.label}>비밀번호 확인</label>
@@ -299,7 +301,9 @@ function ForgotPasswordPage({ toast, goLogin }) {
           <div style={{ marginBottom: 16 }}>
             <label style={S.label}>새 비밀번호</label>
             <input style={S.formInput} type="password" placeholder="8자 이상 입력" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-            <p style={{ fontSize: 11, color: C.textLight, marginTop: 5 }}>영문, 숫자, 특수문자 포함 8자 이상</p>
+            <p style={{ fontSize: 11, color: newPassword && !validatePassword(newPassword) ? C.red : C.textLight, marginTop: 5 }}>
+              {newPassword && !validatePassword(newPassword) ? "⚠ 영문, 숫자, 특수문자를 모두 포함해야 합니다" : "영문, 숫자, 특수문자 포함 8자 이상"}
+            </p>
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={S.label}>비밀번호 확인</label>

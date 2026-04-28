@@ -47,6 +47,29 @@ const getPasswordErrorMessage = (password) => {
   return null;
 };
 
+// ── File to document title mapping ──
+const inferDocumentTitle = (fileName) => {
+  const lowerName = fileName.toLowerCase();
+
+  // 문서 제목 매핑
+  const mappings = [
+    { keywords: ["국가장학금"], title: "국가장학금 신청" },
+    { keywords: ["졸업"], title: "졸업예비심사 신청" },
+    { keywords: ["근로장학금"], title: "근로장학금 신청" },
+    { keywords: ["복지장학금"], title: "복지장학금 신청" },
+    { keywords: ["휴학"], title: "휴학 신청" },
+  ];
+
+  for (const mapping of mappings) {
+    if (mapping.keywords.some(keyword => lowerName.includes(keyword))) {
+      return mapping.title;
+    }
+  }
+
+  // 매칭되지 않으면 파일명에서 확장자 제거한 것을 제목으로
+  return fileName.replace(/\.[^/.]+$/, "");
+};
+
 // ── Email validation ──
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -754,6 +777,7 @@ function UploadPage({ onNavTo }) {
   const [fileToUpload, setFileToUpload] = useState(null);
   const [checkedFiles, setCheckedFiles] = useState({});
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analyzedFiles, setAnalyzedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const recentFiles = [
     { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false, scheduleTitle: "국가장학금 신청" },
@@ -832,7 +856,22 @@ function UploadPage({ onNavTo }) {
             {queue.length > 0 && (
               <div style={{ display: "flex", gap: 10, marginTop: 10, justifyContent: "flex-end" }}>
                 <button onClick={() => { setQueue([]); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ ...S.btnOutline, fontSize: 13 }}>업로드 취소</button>
-                <button onClick={() => { const selectedCount = Object.values(checkedFiles).filter(Boolean).length; if (selectedCount > 0 || queue.length > 0) setShowAnalysisModal(true); }} style={{ ...S.btnPrimary, fontSize: 13, justifyContent: "center" }}>분석하기</button>
+                <button onClick={() => {
+                  const filesToAnalyze = queue.filter((f, idx) => Object.values(checkedFiles).length === 0 || checkedFiles[f.id]);
+                  if (filesToAnalyze.length > 0) {
+                    const files = filesToAnalyze.map(f => ({
+                      id: f.id,
+                      name: f.name,
+                      title: inferDocumentTitle(f.name),
+                      uploadDate: new Date().toISOString().split('T')[0].replace(/-/g, '.')
+                    }));
+                    setAnalyzedFiles(files);
+                    // localStorage에 저장
+                    const stored = JSON.parse(localStorage.getItem('uploadedDocuments') || '[]');
+                    localStorage.setItem('uploadedDocuments', JSON.stringify([...stored, ...files]));
+                    setShowAnalysisModal(true);
+                  }
+                }} style={{ ...S.btnPrimary, fontSize: 13, justifyContent: "center" }}>분석하기</button>
               </div>
             )}
           </div>
@@ -902,17 +941,31 @@ function UploadPage({ onNavTo }) {
       )}
 
       {/* 분석 완료 모달 */}
-      {showAnalysisModal && (
+      {showAnalysisModal && analyzedFiles.length > 0 && (
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-          <div style={{ background: "white", borderRadius: 14, padding: 40, textAlign: "center", maxWidth: 380, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>분석이 완료되었습니다.</div>
-            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24, lineHeight: 1.6 }}>
-              업로드하신 문서 분석이 성공적으로 완료되었습니다.<br/>분석 결과를 확인하시겠습니까?
+          <div style={{ background: "white", borderRadius: 14, padding: 40, maxWidth: 420, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 48, marginBottom: 16, textAlign: "center" }}>✅</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, textAlign: "center" }}>분석이 완료되었습니다.</div>
+            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24, lineHeight: 1.6, textAlign: "center" }}>
+              업로드하신 {analyzedFiles.length}개 문서 분석이 성공적으로 완료되었습니다.
             </div>
+
+            {/* 분석된 파일 목록 */}
+            <div style={{ background: C.purpleBg, borderRadius: 10, padding: 16, marginBottom: 20, maxHeight: 200, overflowY: "auto" }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: C.purple, marginBottom: 10 }}>분석된 문서</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {analyzedFiles.map((file, idx) => (
+                  <div key={idx} style={{ fontSize: 12, color: C.text, padding: "8px 0", borderBottom: idx < analyzedFiles.length - 1 ? `1px solid rgba(107,79,232,0.2)` : "none" }}>
+                    <div style={{ fontWeight: 600, marginBottom: 2 }}>📄 {file.name}</div>
+                    <div style={{ fontSize: 11, color: C.textLight }}>제목: {file.title}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setShowAnalysisModal(false)} style={{ ...S.btnOutline, flex: 1, fontSize: 13, justifyContent: "center" }}>닫기</button>
-              <button onClick={() => { setShowAnalysisModal(false); onNavTo("notif-analysis"); }} style={{ ...S.btnPrimary, flex: 1, fontSize: 13, justifyContent: "center" }}>결과 보기</button>
+              <button onClick={() => { setShowAnalysisModal(false); onNavTo("schedule-detail", analyzedFiles[0].title); }} style={{ ...S.btnPrimary, flex: 1, fontSize: 13, justifyContent: "center" }}>결과 보기</button>
             </div>
           </div>
         </div>
@@ -1014,12 +1067,46 @@ function CheckItem({ label, defaultChecked }) {
 }
 
 function OngoingPage({ onNavTo }) {
-  const docsInitial = [
+  const baseDocsInitial = [
     { title:"국가장학금 신청", upload:"2026.03.14", deadline:"2026-03-22 17:00 · D-3", dc: C.red, db: C.redBg, scheduleDay: 22,
       checks:[{l:"소득분위 확인서 제출"},{l:"학교 포털 신청서 작성 완료"},{l:"주민등록등본 업로드"},{l:"가족관계증명서 제출"},{l:"재학증명서 제출"}], total:5 },
     { title:"졸업예비심사 신청", upload:"2026.03.10", deadline:"2026-03-22 18:00 · D-8", dc:"#EA580C", db:"#FFF7ED", scheduleDay: 22,
       checks:[{l:"졸업논문 계획서 초안 작성"},{l:"지도교수 확인서 수령"},{l:"학교 포털 심사 신청"}], total:3 },
   ];
+
+  // localStorage에서 업로드된 문서 로드
+  const uploadedDocs = JSON.parse(localStorage.getItem('uploadedDocuments') || '[]').map(doc => {
+    const baseDoc = baseDocsInitial.find(d => d.title === doc.title);
+    if (baseDoc) {
+      return { ...baseDoc };
+    }
+    // 새로운 문서 제목인 경우
+    return {
+      title: doc.title,
+      upload: doc.uploadDate,
+      deadline: "미정",
+      dc: C.purple,
+      db: C.purpleBg,
+      scheduleDay: null,
+      checks: [{l: "문서 검토"}],
+      total: 1,
+      isUploaded: true
+    };
+  });
+
+  // 중복 제거 - 같은 제목이 여러 번 나타나지 않도록 (최신 1개만 유지)
+  const docsMap = new Map();
+  uploadedDocs.forEach(doc => {
+    if (!docsMap.has(doc.title)) {
+      docsMap.set(doc.title, doc);
+    }
+  });
+  baseDocsInitial.forEach(doc => {
+    if (!docsMap.has(doc.title)) {
+      docsMap.set(doc.title, doc);
+    }
+  });
+  const docsInitial = Array.from(docsMap.values());
 
   const checkStates = Object.fromEntries(docsInitial.map(doc => {
     const initialChecks = Array(doc.total).fill(false);
@@ -1211,11 +1298,28 @@ function ScheduleDetailPage({ day, title, prevSub, onNavTo }) {
     }
   }, [memo, checks, day, title]);
 
-  const scheduleDataByTitle = {
+  const baseScheduleDataByTitle = {
     "국가장학금 신청": { title: "국가장학금 신청", deadline: "2026-03-22 17:00", dday: "D-3", summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.", documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"], color: "#A91E2E", bg: "#FFE5E5" },
     "졸업예비심사 신청": { title: "졸업예비심사 신청", deadline: "2026-03-22 18:00", dday: "D-8", summary: "졸업 자격 심사를 위한 졸업예비심사 신청입니다. 졸업논문 계획서와 지도교수 확인서가 필수입니다.", documents: ["졸업논문 계획서", "지도교수 확인서", "학교 포털 심사 신청"], color: "#EA580C", bg: "#FFF7ED" },
     "근로장학금 신청": { title: "근로장학금 신청", deadline: "2026-03-27 23:59", dday: "D-8", summary: "학교 근로 장학금 신청입니다. 근로시간 증명서와 통장 사본이 필요합니다.", documents: ["재학증명서", "통장 사본", "신원증 사본"], color: C.green, bg: "#F0FDF4" }
   };
+
+  // 업로드된 문서도 포함
+  const scheduleDataByTitle = { ...baseScheduleDataByTitle };
+  const uploadedDocs = JSON.parse(localStorage.getItem('uploadedDocuments') || '[]');
+  uploadedDocs.forEach(doc => {
+    if (!scheduleDataByTitle[doc.title]) {
+      scheduleDataByTitle[doc.title] = {
+        title: doc.title,
+        deadline: doc.uploadDate,
+        dday: "분석 중",
+        summary: `업로드된 문서: ${doc.name}`,
+        documents: ["문서 검토"],
+        color: C.purple,
+        bg: C.purpleBg
+      };
+    }
+  });
 
   const scheduleData = {
     22: { title: "국가장학금 신청", deadline: "2026-03-22 17:00", dday: "D-3", summary: "정부에서 지원하는 국가 장학금 신청 프로세스입니다. 소득분위 확인 및 필수 서류 제출이 필요합니다.", documents: ["소득분위 확인서", "가족관계증명서", "재학증명서", "주민등록등본"], color: "#A91E2E", bg: "#FFE5E5" },
@@ -1223,7 +1327,7 @@ function ScheduleDetailPage({ day, title, prevSub, onNavTo }) {
   };
 
   const data = title ? scheduleDataByTitle[title] : scheduleData[day];
-  if (!data) return <div>일정을 찾을 수 없습니다</div>;
+  if (!data) return <div style={{ textAlign: "center", padding: 40, color: C.textLight }}>일정을 찾을 수 없습니다</div>;
 
   const toggleCheck = (idx) => {
     setChecks(p => ({ ...p, [idx]: !p[idx] }));

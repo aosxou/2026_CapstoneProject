@@ -753,6 +753,7 @@ function UploadPage({ onNavTo }) {
   const [uploadConfirm, setUploadConfirm] = useState(false);
   const [fileToUpload, setFileToUpload] = useState(null);
   const [checkedFiles, setCheckedFiles] = useState({});
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const fileInputRef = useRef(null);
   const recentFiles = [
     { id: 1, icon: "📄", name: "국가장학금_신청안내.pdf", date: "2026.03.14", done: false, scheduleTitle: "국가장학금 신청" },
@@ -831,7 +832,7 @@ function UploadPage({ onNavTo }) {
             {queue.length > 0 && (
               <div style={{ display: "flex", gap: 10, marginTop: 10, justifyContent: "flex-end" }}>
                 <button onClick={() => { setQueue([]); if (fileInputRef.current) fileInputRef.current.value = ''; }} style={{ ...S.btnOutline, fontSize: 13 }}>업로드 취소</button>
-                <button onClick={() => {}} style={{ ...S.btnPrimary, fontSize: 13, justifyContent: "center" }}>분석하기</button>
+                <button onClick={() => { const selectedCount = Object.values(checkedFiles).filter(Boolean).length; if (selectedCount > 0 || queue.length > 0) setShowAnalysisModal(true); }} style={{ ...S.btnPrimary, fontSize: 13, justifyContent: "center" }}>분석하기</button>
               </div>
             )}
           </div>
@@ -896,6 +897,23 @@ function UploadPage({ onNavTo }) {
             {queue.every(f => f.progress === 100) && (
               <div style={{ textAlign: "center", marginTop: 20, fontSize: 14, color: C.green, fontWeight: 600 }}>✅ 업로드 완료</div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 분석 완료 모달 */}
+      {showAnalysisModal && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div style={{ background: "white", borderRadius: 14, padding: 40, textAlign: "center", maxWidth: 380, boxShadow: "0 20px 48px rgba(0,0,0,0.2)" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>분석이 완료되었습니다.</div>
+            <div style={{ fontSize: 13, color: C.textLight, marginBottom: 24, lineHeight: 1.6 }}>
+              업로드하신 문서 분석이 성공적으로 완료되었습니다.<br/>분석 결과를 확인하시겠습니까?
+            </div>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setShowAnalysisModal(false)} style={{ ...S.btnOutline, flex: 1, fontSize: 13, justifyContent: "center" }}>닫기</button>
+              <button onClick={() => { setShowAnalysisModal(false); onNavTo("notif-analysis"); }} style={{ ...S.btnPrimary, flex: 1, fontSize: 13, justifyContent: "center" }}>결과 보기</button>
+            </div>
           </div>
         </div>
       )}
